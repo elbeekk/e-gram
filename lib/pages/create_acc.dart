@@ -29,22 +29,29 @@ class _CreateAccountState extends State<CreateAccount> {
   final TextEditingController firstName = TextEditingController();
   final TextEditingController lastName = TextEditingController();
   CollectionReference users = FirebaseFirestore.instance.collection('users');
-  String link = '';
+
   XFile? image;
 
+
+
+  String link = '';
   uploadImage() async {
-    final path = FirebaseAuth.instance.currentUser!.uid;
     final file = File(image!.path);
-    final ref = FirebaseStorage.instance.ref().child('users').child(path);
+    final ref = FirebaseStorage.instance.ref().child('users/${image!.name}');
     var uploadTask = ref.putFile(file);
-    uploadTask.whenComplete(() async {
+    await uploadTask.whenComplete(() {
       try {
-        link = await ref.getDownloadURL();
+       setState(() async {
+         link = await ref.getDownloadURL();
+         print("#################### Link -> $link <- Link ###################");
+       });
       } catch (onError) {
         print("Error");
       }
     });
   }
+  
+
 
   create_ac() async {
     var uid = FirebaseAuth.instance.currentUser!.uid;
@@ -73,15 +80,13 @@ class _CreateAccountState extends State<CreateAccount> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        backgroundColor: darkMode
-            ? Colors.blue.shade200.withOpacity(0.2)
-            : Colors.grey.shade50,
+        backgroundColor:
+        darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
         body: SafeArea(
           child: Scaffold(
             extendBodyBehindAppBar: true,
-            backgroundColor: darkMode
-                ? Colors.blue.shade200.withOpacity(0.2)
-                : Colors.grey.shade50,
+            backgroundColor:
+            darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
             appBar: AppBar(
               leading: TargetPlatform.android == currentPlatform
                   ? GestureDetector(
@@ -197,11 +202,12 @@ class _CreateAccountState extends State<CreateAccount> {
                     }
                   }
                 },
-                backgroundColor: Colors.blue.shade300,
+                backgroundColor:
+                darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
                 elevation: 0,
                 child: TargetPlatform.android == currentPlatform
-                    ? const Icon(Icons.arrow_forward)
-                    : const Icon(Icons.arrow_forward_ios)),
+                    ? const Icon(Icons.arrow_forward,color: Colors.white,)
+                    : const Icon(Icons.arrow_forward_ios,color: Colors.white,)),
             body: SingleChildScrollView(
               padding: EdgeInsets.only(top: MediaQuery.sizeOf(context).height*0.1,bottom: MediaQuery.sizeOf(context).height*0.05),
               child: Column(
@@ -290,7 +296,8 @@ class _CreateAccountState extends State<CreateAccount> {
                         },
                         child: CircleAvatar(
                             radius: 40,
-                            backgroundColor: Colors.blue.shade400,
+                            backgroundColor:
+                            darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
                             backgroundImage: image != null
                                 ? FileImage(File(image!.path))
                                 : null,

@@ -34,12 +34,13 @@ class _RegPageState extends State<RegPage> {
         Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => CreateAccount(
-                city: city,
-                country: country,
-                state: state,
-                email: emailAddress.text,
-              ),
+              builder: (context) =>
+                  CreateAccount(
+                    city: city,
+                    country: country,
+                    state: state,
+                    email: emailAddress.text,
+                  ),
             ));
         timer.cancel();
       }
@@ -48,23 +49,28 @@ class _RegPageState extends State<RegPage> {
 
   @override
   Widget build(BuildContext context) {
-    var currentPlatform = Theme.of(context).platform;
-    bool darkMode = Provider.of<VarProvider>(context).darkMode;
+    var currentPlatform = Theme
+        .of(context)
+        .platform;
+    bool darkMode = Provider
+        .of<VarProvider>(context)
+        .darkMode;
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        backgroundColor: darkMode
-            ? Colors.blue.shade200.withOpacity(0.2)
-            : Colors.grey.shade50,
+
+        backgroundColor:
+        darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
         resizeToAvoidBottomInset: true,
         floatingActionButton: FloatingActionButton(
             elevation: 0,
             onPressed: () async {
               await registration(context, darkMode);
             },
-            backgroundColor: Colors.blue.shade300,
+            backgroundColor:
+            darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
             child: Icon(
               TargetPlatform.android == currentPlatform
                   ? Icons.arrow_forward
@@ -74,8 +80,12 @@ class _RegPageState extends State<RegPage> {
         body: SafeArea(
           child: SingleChildScrollView(
             padding: EdgeInsets.only(
-                top: MediaQuery.sizeOf(context).height * .1,
-                bottom: MediaQuery.sizeOf(context).height * .05),
+                top: MediaQuery
+                    .sizeOf(context)
+                    .height * .1,
+                bottom: MediaQuery
+                    .sizeOf(context)
+                    .height * .05),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -117,18 +127,21 @@ class _RegPageState extends State<RegPage> {
                       child: Container(
                         margin: const EdgeInsets.only(left: 30, right: 10),
                         height: 50,
-                        width: MediaQuery.of(context).size.width * 0.4,
+                        width: MediaQuery
+                            .of(context)
+                            .size
+                            .width * 0.4,
                         decoration: BoxDecoration(
                             borderRadius: const BorderRadius.only(
                                 topRight: Radius.circular(10),
                                 topLeft: Radius.circular(10)),
                             color: darkMode
                                 ? (isLogin
-                                    ? Colors.blue.shade800
-                                    : Colors.blue.shade500.withOpacity(0.2))
+                                ? Colors.blue.shade800
+                                : Colors.blue.shade500.withOpacity(0.2))
                                 : isLogin
-                                    ? Colors.blue.shade300
-                                    : Colors.blue.shade100),
+                                ? Colors.blue.shade300
+                                : Colors.blue.shade100),
                         child: Center(
                           child: Text(
                             'Sign in',
@@ -150,18 +163,21 @@ class _RegPageState extends State<RegPage> {
                       child: Container(
                         margin: const EdgeInsets.only(right: 30),
                         height: 50,
-                        width: MediaQuery.of(context).size.width * 0.4,
+                        width: MediaQuery
+                            .of(context)
+                            .size
+                            .width * 0.4,
                         decoration: BoxDecoration(
                             borderRadius: const BorderRadius.only(
                                 topRight: Radius.circular(10),
                                 topLeft: Radius.circular(10)),
                             color: darkMode
                                 ? (isLogin
-                                    ? Colors.blue.shade500.withOpacity(0.2)
-                                    : Colors.blue.shade800)
+                                ? Colors.blue.shade500.withOpacity(0.2)
+                                : Colors.blue.shade800)
                                 : isLogin
-                                    ? Colors.blue.shade100
-                                    : Colors.blue.shade300),
+                                ? Colors.blue.shade100
+                                : Colors.blue.shade300),
                         child: Center(
                           child: Text(
                             'Sign up',
@@ -226,11 +242,11 @@ class _RegPageState extends State<RegPage> {
                       dropdownDecoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                           color:
-                              darkMode ? Colors.grey.shade800 : Colors.white),
+                          darkMode ? Colors.grey.shade800 : Colors.white),
                       disabledDropdownDecoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(5),
                           color:
-                              darkMode ? Colors.grey.shade800 : Colors.white),
+                          darkMode ? Colors.grey.shade800 : Colors.white),
                       defaultCountry: CscCountry.Uzbekistan,
                       layout: Layout.vertical,
                       onCountryChanged: (value) {
@@ -255,11 +271,17 @@ class _RegPageState extends State<RegPage> {
                 if (isLogin)
                   TextButton(
                     onPressed: () async {
-                      try{
-                        await FirebaseAuth.instance.sendPasswordResetEmail(email: emailAddress.text);
-                      }catch(e){
+                      try {
+                        await FirebaseAuth.instance.sendPasswordResetEmail(
+                            email: emailAddress.text);
+                        showCupertinoModalPopup1(context,
+                            "We have sent a confirmation link to your email, please check your email.",
+                            true);
+                      } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            backgroundColor: darkMode ? Colors.red.shade900 : Colors.red.shade200,
+                            backgroundColor: darkMode
+                                ? Colors.red.shade900
+                                : Colors.red.shade200,
                             content: Text(
                               e.toString().split(']')[1],
                               style: const TextStyle(color: Colors.white),
@@ -299,7 +321,7 @@ class _RegPageState extends State<RegPage> {
                 MaterialPageRoute(
                   builder: (context) => HomePage(),
                 ),
-                (route) => false);
+                    (route) => false);
           } catch (error) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -307,7 +329,7 @@ class _RegPageState extends State<RegPage> {
                   error.toString().split(']')[1],
                 ),
                 backgroundColor:
-                    darkMode ? Colors.red.shade900 : Colors.red.shade200,
+                darkMode ? Colors.red.shade900 : Colors.red.shade200,
               ),
             );
           }
@@ -317,7 +339,9 @@ class _RegPageState extends State<RegPage> {
                 email: emailAddress.text.trim(),
                 password: password.text.trim());
             await FirebaseAuth.instance.currentUser?.sendEmailVerification();
-            showCupertinoModalPopup1(context);
+            showCupertinoModalPopup1(context,
+                "We have sent a confirmation link to your email, please check your email.",
+                false);
             push();
           } catch (error) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -327,7 +351,7 @@ class _RegPageState extends State<RegPage> {
                   style: const TextStyle(color: Colors.white),
                 ),
                 backgroundColor:
-                    darkMode ? Colors.red.shade900 : Colors.red.shade200,
+                darkMode ? Colors.red.shade900 : Colors.red.shade200,
               ),
             );
           }
@@ -340,79 +364,85 @@ class _RegPageState extends State<RegPage> {
               style: const TextStyle(color: Colors.white),
             ),
             backgroundColor:
-                darkMode ? Colors.red.shade900 : Colors.red.shade200,
+            darkMode ? Colors.red.shade900 : Colors.red.shade200,
           ),
         );
       }
     }
   }
 
-  Future<dynamic> showCupertinoModalPopup1(BuildContext context) {
+  Future<dynamic> showCupertinoModalPopup1(BuildContext context, String text,
+      bool isReset) {
     return showCupertinoModalPopup(
       context: context,
-      builder: (context) => Scaffold(
-        backgroundColor: Colors.transparent.withOpacity(0.6),
-        body: Center(
-            child: Padding(
-          padding: const EdgeInsets.only(bottom: 50),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(''),
-              Column(
-                children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(
-                    height: 25,
-                  ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.8,
-                    child: const Text(
-                      "We have sent a confirmation link to your email, please check your email.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          wordSpacing: 2),
-                    ),
-                  ),
-                ],
-              ),
-              GestureDetector(
-                onTap: () async {
-                  Navigator.pop(context);
-                  await FirebaseAuth.instance.currentUser!.delete();
-                },
-                child: Container(
-                  height: 30,
-                  width: 100,
-                  decoration: BoxDecoration(
-                      color: Colors.blue.shade400,
-                      borderRadius: BorderRadius.circular(15)),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+      builder: (context) =>
+          Scaffold(
+            backgroundColor: Colors.transparent.withOpacity(0.6),
+            body: Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 50),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.arrow_back,
-                        size: 18,
-                        color: Colors.white,
+                      const Text(''),
+                      Column(
+                        children: [
+                          const CircularProgressIndicator(),
+                          const SizedBox(
+                            height: 25,
+                          ),
+                          SizedBox(
+                            width: MediaQuery
+                                .of(context)
+                                .size
+                                .width * 0.8,
+                            child: Text(
+                              text,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  wordSpacing: 2),
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(
-                        width: 5,
-                      ),
-                      Text(
-                        'Go back',
-                        style: TextStyle(color: Colors.white),
+                      GestureDetector(
+                        onTap: () async {
+                          Navigator.pop(context);
+                          if (!isReset) await FirebaseAuth.instance.currentUser!
+                              .delete();
+                        },
+                        child: Container(
+                          height: 30,
+                          width: 100,
+                          decoration: BoxDecoration(
+                              color: Colors.blue.shade400,
+                              borderRadius: BorderRadius.circular(15)),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.arrow_back,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                'Go back',
+                                style: TextStyle(color: Colors.white),
+                              )
+                            ],
+                          ),
+                        ),
                       )
                     ],
                   ),
-                ),
-              )
-            ],
+                )),
           ),
-        )),
-      ),
     );
   }
 }

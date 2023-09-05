@@ -1,9 +1,13 @@
 import 'package:animations/animations.dart';
+import 'package:dio/dio.dart';
 import 'package:elbekgram/usermodel.dart';
 import 'package:elbekgram/var_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+import 'package:gallery_saver/gallery_saver.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 class MyProfile extends StatefulWidget {
@@ -95,171 +99,190 @@ class _MyProfileState extends State<MyProfile> {
                             NetworkImage(widget.userModel.userImages[0]),
                       ),
                       openBuilder: (context, action) {
-                        return Container(
-                          decoration: const BoxDecoration(color: Colors.black),
-                          height: height,
-                          width: width,
-                          child: SafeArea(
-                            child: Column(
-                              children: [
-                                Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                          left: 25, right: 15),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          GestureDetector(
-                                            onTap: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: currentPlatform ==
-                                                    TargetPlatform.android
-                                                ? const Icon(
-                                                    Icons.arrow_back,
-                                                    color: Colors.white,
-                                                  )
-                                                : const Icon(
-                                                    Icons.arrow_back_ios,
-                                                    color: Colors.white,
-                                                  ),
-                                          ),
-                                          PopupMenuButton(
-                                            shape: const RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10))),
-                                            color: const Color(0xff303841),
-                                            itemBuilder: (context) {
-                                              var list =
-                                                  <PopupMenuEntry<Object>>[
-                                                const PopupMenuItem(
-                                                  child: Row(
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                right: 15),
-                                                        child: Icon(
-                                                          MaterialCommunityIcons
-                                                              .share_variant_outline,
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        'Share',
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                const PopupMenuItem(
-                                                  child: Row(
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            EdgeInsets.only(
-                                                                right: 15),
-                                                        child: Icon(
-                                                          MaterialCommunityIcons
-                                                              .progress_download,
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        'Save to Gallery',
-                                                        style: TextStyle(
-                                                            color:
-                                                                Colors.white),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ];
-                                              list.insert(
-                                                  1,
-                                                  const PopupMenuDivider(
-                                                    height: 5,
-                                                  ));
-                                              return list;
-                                            },
-                                            child: Transform.rotate(
-                                              angle: 3.14 / 1,
-                                              child: SizedBox(
-                                                width: height * .047,
-                                                height: height * .047,
-                                                child: const Center(
-                                                    child: Icon(
-                                                  Icons.menu,
-                                                  color: Colors.white,
-                                                )),
+                        return StatefulBuilder(builder: (context, setState1){
+                          return Container(
+                            decoration: const BoxDecoration(color: Colors.black),
+                            height: height,
+                            width: width,
+                            child: SafeArea(
+                              child: Column(
+                                children: [
+                                  Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            top: 20,
+                                            left: 25, right: 15),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: currentPlatform ==
+                                                  TargetPlatform.android
+                                                  ? const Icon(
+                                                Icons.arrow_back,
+                                                color: Colors.white,
+                                              )
+                                                  : const Icon(
+                                                Icons.arrow_back_ios,
+                                                color: Colors.white,
                                               ),
                                             ),
-                                          )
+                                            PopupMenuButton(
+                                              shape: const RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.all(
+                                                      Radius.circular(10))),
+                                              color: const Color(0xff303841),
+                                              itemBuilder: (context) {
+                                                var list =
+                                                <PopupMenuEntry<Object>>[
+                                                  const PopupMenuItem(
+                                                    child: Row(
+                                                      children: [
+                                                        Padding(
+                                                          padding:
+                                                          EdgeInsets.only(
+                                                              right: 15),
+                                                          child: Icon(
+                                                            MaterialCommunityIcons
+                                                                .share_variant_outline,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          'Share',
+                                                          style: TextStyle(
+                                                              color:
+                                                              Colors.white),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                   PopupMenuItem(
+                                                    onTap: ()async{
+                                                      await FileDownloader.downloadFile(url: widget.userModel.userImages[currentIndex],
+                                                      );
+                                                      },
+                                                    child: const Row(
+                                                      children: [
+                                                        Padding(
+                                                          padding:
+                                                          EdgeInsets.only(
+                                                              right: 15),
+                                                          child: Icon(
+                                                            MaterialCommunityIcons
+                                                                .progress_download,
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          'Save to Gallery',
+                                                          style: TextStyle(
+                                                              color:
+                                                              Colors.white),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ];
+                                                list.insert(
+                                                    1,
+                                                    const PopupMenuDivider(
+                                                      height: 5,
+                                                    ));
+                                                return list;
+                                              },
+                                              child: Transform.rotate(
+                                                angle: 3.14 / 1,
+                                                child: SizedBox(
+                                                  width: height * .047,
+                                                  height: height * .047,
+                                                  child: const Center(
+                                                      child: Icon(
+                                                        Icons.menu,
+                                                        color: Colors.white,
+                                                      )),
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        height: height*0.04,
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            (currentIndex + 1).toString(),
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 17),
+                                          ),
+                                          const Text(
+                                            ' of ',
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 17),
+                                          ),
+                                          Text(
+                                            widget.userModel.userImages.length
+                                                .toString(),
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 17),
+                                          ),
                                         ],
                                       ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          (currentIndex + 1).toString(),
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 17),
-                                        ),
-                                        const Text(
-                                          ' of ',
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 17),
-                                        ),
-                                        Text(
-                                          widget.userModel.userImages.length
-                                              .toString(),
-                                          style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w500,
-                                              fontSize: 17),
-                                        ),
-                                      ],
-                                    ),
-                                    Container(
-                                      margin:
-                                          EdgeInsets.only(top: height * 0.14),
-                                      height: height * 0.4,
-                                      width: width,
-                                      child: PageView.builder(
-                                        onPageChanged: (value) {
-                                          setState(() {
-                                            currentIndex=value;
-                                          });
-                                        },
-                                        itemCount: widget.userModel.userImages.length,
-                                        itemBuilder: (context, index) =>
-                                            Container(
-                                          decoration: BoxDecoration(
-                                            image: DecorationImage(image:
-                                          NetworkImage(widget.userModel.userImages[index]),fit: BoxFit.cover)
+                                      Column(
+                                        children: [
+                                          Container(
+                                            margin:
+                                            EdgeInsets.only(top: height * 0.12),
+                                            height: height * 0.4,
+                                            width: width,
+                                            child: PageView.builder(
+                                              onPageChanged: (value) {
+                                                setState1(() {
+                                                  currentIndex=value;
+                                                },);
+                                              },
+                                              itemCount: widget.userModel.userImages.length,
+                                              itemBuilder: (context, index) =>
+                                                  Container(
+                                                    decoration: BoxDecoration(
+                                                        image: DecorationImage(image:
+                                                        NetworkImage(widget.userModel.userImages[index]),fit: BoxFit.cover)
+                                                    ),
+                                                  ),
+                                            ),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                    )
-                                  ],
-                                )
-                              ],
+                                      // Container(
+                                      //   color: Colors.red,
+                                      //   height: 100,
+                                      //   width: width,
+                                      //   child: ListView.builder(
+                                      //       itemCount: widget.userModel.userImages.length,
+                                      //       itemBuilder: ),
+                                      // )
+                                    ],
+                                  )
+                                ],
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        });
                       },
                     ),
                     const SizedBox(

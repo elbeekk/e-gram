@@ -48,6 +48,10 @@ dependencies:
   lottie: ^2.6.0
   animations: ^2.0.8
   icon_forest: ^1.1.8
+  gallery_saver: ^2.3.2
+  path_provider: ^2.1.1
+  dio: ^5.3.2
+  flutter_file_downloader: ^1.1.2
 
 dev_dependencies:
   flutter_test:
