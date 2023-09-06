@@ -84,7 +84,7 @@ class _ChatPageState extends State<ChatPage> {
                               CircleAvatar(
                                 radius: height * .025,
                                 backgroundImage: NetworkImage(
-                                    widget.userModel.userImages[0]),
+                                    widget.userModel.userImages[widget.userModel.userImages.length-1]),
                               ),
                               const SizedBox(
                                 width: 15,

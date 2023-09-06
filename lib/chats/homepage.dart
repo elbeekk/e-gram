@@ -59,7 +59,6 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             FirebaseAuth.instance.signOut();
-            Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => const IntroPage(),), (route) => false);
           },
           elevation: 0,
           backgroundColor: darkMode
@@ -122,7 +121,7 @@ class _HomePageState extends State<HomePage> {
                   },
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: NetworkImage(user.userImages[0]),
+                      backgroundImage: NetworkImage(user.userImages[user.userImages.length-1]),
                       radius: 25,
                       backgroundColor: Colors.white,
                     ),

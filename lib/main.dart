@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:elbekgram/chats/homepage.dart';
 import 'package:elbekgram/firebase_options.dart';
@@ -13,8 +14,15 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(ChangeNotifierProvider(create: (BuildContext context) { return VarProvider(); },
-  child: const MyApp()));
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown
+  ]);
+  runApp(ChangeNotifierProvider(
+      create: (BuildContext context) {
+        return VarProvider();
+      },
+      child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -26,21 +34,20 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         title: "Elbekgram",
         theme: ThemeData(
-          brightness: darkMode ? Brightness.dark:Brightness.light
-        ),
+            brightness: darkMode ? Brightness.dark : Brightness.light),
         debugShowCheckedModeBanner: false,
         home: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {
-            if(snapshot.connectionState==ConnectionState.active){
-              if(snapshot.hasData){
+            if (snapshot.connectionState == ConnectionState.active) {
+              if (snapshot.hasData) {
                 return HomePage();
-              } else if(snapshot.hasError){
+              } else if (snapshot.hasError) {
                 return Center(
                   child: Text("${snapshot.hasError}"),
                 );
               }
-              if(snapshot.connectionState==ConnectionState.waiting){
+              if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
                   child: CircularProgressIndicator(
                     color: Colors.white,
@@ -50,7 +57,6 @@ class MyApp extends StatelessWidget {
             }
             return const IntroPage();
           },
-        )
-    );
+        ));
   }
 }

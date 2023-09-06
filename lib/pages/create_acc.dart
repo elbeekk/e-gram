@@ -61,6 +61,7 @@ class _CreateAccountState extends State<CreateAccount> {
       'state': widget.state,
       'city': widget.city,
       'uid': uid,
+      "docId":"",
       'userBio': '',
       'userEmail':widget.email,
       'userName': "${firstName.text} ${lastName.text}",

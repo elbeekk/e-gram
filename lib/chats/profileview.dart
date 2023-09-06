@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
 import 'package:elbekgram/usermodel.dart';
@@ -96,7 +98,7 @@ class _MyProfileState extends State<MyProfile> {
                       closedBuilder: (context, action) => CircleAvatar(
                         radius: height * 0.026,
                         backgroundImage:
-                            NetworkImage(widget.userModel.userImages[0]),
+                            NetworkImage(widget.userModel.userImages[widget.userModel.userImages.length-1]),
                       ),
                       openBuilder: (context, action) {
                         return StatefulBuilder(builder: (context, setState1){
@@ -163,9 +165,10 @@ class _MyProfileState extends State<MyProfile> {
                                                     ),
                                                   ),
                                                    PopupMenuItem(
-                                                    onTap: ()async{
-                                                      await FileDownloader.downloadFile(url: widget.userModel.userImages[currentIndex],
-                                                      );
+                                                    onTap: (){
+                                                      String fileName = "${widget.userModel.userName.trim()}_profile${currentIndex+1}";
+                                                      downloadFile(widget.userModel.userImages[currentIndex],fileName);
+
                                                       },
                                                     child: const Row(
                                                       children: [
@@ -251,6 +254,7 @@ class _MyProfileState extends State<MyProfile> {
                                             height: height * 0.4,
                                             width: width,
                                             child: PageView.builder(
+                                              pageSnapping: true,
                                               onPageChanged: (value) {
                                                 setState1(() {
                                                   currentIndex=value;
@@ -261,7 +265,7 @@ class _MyProfileState extends State<MyProfile> {
                                                   Container(
                                                     decoration: BoxDecoration(
                                                         image: DecorationImage(image:
-                                                        NetworkImage(widget.userModel.userImages[index]),fit: BoxFit.cover)
+                                                        NetworkImage(widget.userModel.userImages[widget.userModel.userImages.length-1-index]),fit: BoxFit.cover)
                                                     ),
                                                   ),
                                             ),
@@ -444,5 +448,22 @@ class _MyProfileState extends State<MyProfile> {
             ),
           ],
         ));
+  }
+
+  Future<File?> downloadFile(userImag, String fileName) async{
+    final appStorage = await getApplicationDocumentsDirectory();
+    final file = File("${appStorage.path}/$fileName");
+    final response = await Dio().get(
+      userImag,
+      options: Options(
+        responseType: ResponseType.bytes,
+        followRedirects: false,
+      ),
+    );
+    final raf = file.openSync(mode: FileMode.write);
+    raf.writeFromSync(response.data);
+    await raf.close();
+    return file;
+
   }
 }
