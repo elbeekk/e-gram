@@ -10,7 +10,7 @@ import 'package:elbekgram/pages/create_acc.dart';
 import 'package:elbekgram/var_provider.dart';
 
 class RegPage extends StatefulWidget {
-  RegPage({super.key});
+  const RegPage({super.key});
 
   @override
   State<RegPage> createState() => _RegPageState();
@@ -319,7 +319,7 @@ class _RegPageState extends State<RegPage> {
             Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => HomePage(),
+                  builder: (context) => const HomePage(),
                 ),
                     (route) => false);
           } catch (error) {
@@ -411,8 +411,8 @@ class _RegPageState extends State<RegPage> {
                       GestureDetector(
                         onTap: () async {
                           Navigator.pop(context);
-                          if (!isReset) await FirebaseAuth.instance.currentUser!
-                              .delete();
+                          if (!isReset) {await FirebaseAuth.instance.currentUser!
+                              .delete();}
                         },
                         child: Container(
                           height: 30,

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:elbekgram/var_provider.dart';
 
 class MyStories extends StatefulWidget {
-  MyStories({super.key});
+  const MyStories({super.key});
 
   @override
   State<MyStories> createState() => _MyStoriesState();
@@ -20,7 +20,6 @@ class _MyStoriesState extends State<MyStories> {
     var currentPlatform = Theme.of(context).platform;
     bool darkMode = Provider.of<VarProvider>(context).darkMode;
     double height = MediaQuery.sizeOf(context).height;
-    double width = MediaQuery.sizeOf(context).width;
     return Scaffold(
       backgroundColor:
       darkMode
@@ -37,11 +36,11 @@ class _MyStoriesState extends State<MyStories> {
             Navigator.pop(context);
           },
           child: currentPlatform == TargetPlatform.android
-              ? Icon(
+              ? const Icon(
                   Icons.arrow_back,
                   color:  Colors.white ,
                 )
-              : Icon(
+              : const Icon(
                   Icons.arrow_back_ios,
                   color:  Colors.white ,
                 ),
@@ -83,10 +82,10 @@ class _MyStoriesState extends State<MyStories> {
               ),
             ),
             backgroundColor: darkMode ? Colors.blue : Colors.grey.shade50,
-            icon: Container(
+            icon: const SizedBox(
               height: 30,
               width: 60,
-              child: const Icon(
+              child: Icon(
                 MaterialCommunityIcons.progress_check,
               ),
             ),
@@ -103,10 +102,10 @@ class _MyStoriesState extends State<MyStories> {
                   MaterialCommunityIcons.progress_clock,
                 ),
               ),
-              icon: Container(
+              icon: const SizedBox(
                 height: 30,
                 width: 60,
-                child: const Icon(
+                child: Icon(
                   MaterialCommunityIcons.progress_clock,
                 ),
               ),

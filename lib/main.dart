@@ -1,7 +1,6 @@
 import 'package:elbekgram/pages/intro.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -41,7 +40,7 @@ class MyApp extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.active) {
               if (snapshot.hasData) {
-                return HomePage();
+                return const HomePage();
               } else if (snapshot.hasError) {
                 return Center(
                   child: Text("${snapshot.hasError}"),

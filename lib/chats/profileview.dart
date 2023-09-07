@@ -4,9 +4,7 @@ import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
 import 'package:elbekgram/usermodel.dart';
 import 'package:elbekgram/var_provider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
@@ -182,9 +180,8 @@ class _MyProfileState extends State<MyProfile> {
                                                         final tempDir = await getTemporaryDirectory();
                                                         final path = "${tempDir.path}/${widget.userModel.uid}$currentIndex.jpg";
                                                         await Dio().download(urlImage, path);
-                                                        await GallerySaver.saveImage(path,albumName: 'Elbekgram',).whenComplete(() => print('||||||||||||||| SAVED ||||||||||||||'));
+                                                        await GallerySaver.saveImage(path,albumName: 'Elbekgram',);
                                                       }catch(e){
-                                                        print("############### ${e.toString()} ###############");
                                                       }
                                                       },
                                                     child: const Row(
@@ -309,7 +306,7 @@ class _MyProfileState extends State<MyProfile> {
                     const SizedBox(
                       width: 5,
                     ),
-                    Container(
+                    SizedBox(
                       height: height * 0.055,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

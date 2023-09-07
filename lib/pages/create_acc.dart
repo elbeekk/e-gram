@@ -43,7 +43,6 @@ class _CreateAccountState extends State<CreateAccount> {
       try {
        setState(() async {
          link = await ref.getDownloadURL();
-         print("#################### Link -> $link <- Link ###################");
        });
       } catch (onError) {
         print("Error");
@@ -53,7 +52,7 @@ class _CreateAccountState extends State<CreateAccount> {
   
 
 
-  create_ac() async {
+  createAc() async {
     var uid = FirebaseAuth.instance.currentUser!.uid;
     var users = FirebaseFirestore.instance.collection('users');
     users.add({
@@ -139,7 +138,7 @@ class _CreateAccountState extends State<CreateAccount> {
                               borderRadius: BorderRadius.circular(10)
                             ),
                             backgroundColor: darkMode
-                                ? Color(0xff395781)
+                                ? const Color(0xff395781)
                                 : Colors.grey.shade50,
                             shadowColor: Colors.black,
                             content: Text(
@@ -172,11 +171,11 @@ class _CreateAccountState extends State<CreateAccount> {
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  create_ac();
+                                  createAc();
                                   Navigator.pushAndRemoveUntil(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>  HomePage(),
+                                        builder: (context) =>  const HomePage(),
                                       ),
                                       (route) => false);
                                 },
@@ -228,7 +227,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                     borderRadius: BorderRadius.circular(10)
                                 ),
                                 backgroundColor: darkMode
-                                    ? Color(0xff395781)
+                                    ? const Color(0xff395781)
                                     : Colors.grey.shade50,
                                 shadowColor: Colors.black,
                                 content: Row(
@@ -414,7 +413,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                                       borderRadius: BorderRadius.circular(10)
                                                   ),
                                                   backgroundColor: darkMode
-                                                      ? Color(0xff395781)
+                                                      ? const Color(0xff395781)
                                                       : Colors.grey.shade50,
                                                   shadowColor: Colors.black,
                                                   content: Text(

@@ -257,7 +257,7 @@ class _MySettingsState extends State<MySettings> {
                                                             await Share.shareFiles([path],text: 'Profile photo of ${user.userFName} ${user.userLName} in Elbekgram');
 
                                                           },
-                                                          child: Row(
+                                                          child: const Row(
                                                             children: [
                                                               Padding(
                                                                 padding: EdgeInsets
@@ -434,7 +434,7 @@ class _MySettingsState extends State<MySettings> {
                           const SizedBox(
                             width: 10,
                           ),
-                          Container(
+                          SizedBox(
                             height: height * 0.055,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,

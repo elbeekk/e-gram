@@ -119,8 +119,6 @@ class _EditPageState extends State<EditPage> {
   Widget build(BuildContext context) {
     var currentPlatform = Theme.of(context).platform;
     bool darkMode = Provider.of<VarProvider>(context).darkMode;
-    double height = MediaQuery.sizeOf(context).height;
-    double width = MediaQuery.sizeOf(context).width;
     widget.controller.text=widget.info;
     return GestureDetector(
       onTap: () {
@@ -142,7 +140,7 @@ class _EditPageState extends State<EditPage> {
                  Navigator.pop(context);
                }
                if(widget.title=='Email'){
-                 tempEmail= await FirebaseAuth.instance.currentUser!.email;
+                 tempEmail= FirebaseAuth.instance.currentUser!.email;
                    try{
                      if(FirebaseAuth.instance.currentUser!.email!=widget.controller.text.trim()){
                        await FirebaseAuth.instance.currentUser!.updateEmail(

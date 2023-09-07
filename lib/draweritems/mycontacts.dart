@@ -65,7 +65,7 @@ class _MyContactsState extends State<MyContacts> {
               onTap: () {
 
               },
-              child: Container(
+              child: SizedBox(
                 width: width*0.1,
                   child: const Center(child: Icon(Ionicons.search_outline)))),
           const SizedBox(

@@ -4,7 +4,6 @@ import 'package:elbekgram/usermodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:elbekgram/draweritems/mycalls.dart';
 import 'package:elbekgram/draweritems/mycontacts.dart';
@@ -165,7 +164,7 @@ class _MyDrawerState extends State<MyDrawer> {
                     ],
                   ),
                 ),
-                MyDrawerItem(darkMode: darkMode, title: 'My Stories', icon: MaterialCommunityIcons.play_box_multiple_outline,route: MyStories(),),
+                MyDrawerItem(darkMode: darkMode, title: 'My Stories', icon: MaterialCommunityIcons.play_box_multiple_outline,route: const MyStories(),),
                 Divider(
                   height: 5,
                   indent: 0,

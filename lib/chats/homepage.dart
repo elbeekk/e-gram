@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elbekgram/chats/chatpage.dart';
-import 'package:elbekgram/pages/intro.dart';
 import 'package:elbekgram/usermodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +11,7 @@ import 'package:elbekgram/chats/menu_drawer.dart';
 import 'package:elbekgram/var_provider.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -27,7 +25,6 @@ class _HomePageState extends State<HomePage> {
     bool darkMode = Provider
         .of<VarProvider>(context)
         .darkMode;
-    double height = MediaQuery.sizeOf(context).height;
     double width = MediaQuery.sizeOf(context).width;
     return Scaffold(
         key: _key,
@@ -78,7 +75,7 @@ class _HomePageState extends State<HomePage> {
                 child: CircularProgressIndicator(),
               );
             }
-            if (snapshot.data!.docs.length==0) {
+            if (snapshot.data!.docs.isEmpty) {
               return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

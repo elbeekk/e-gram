@@ -74,32 +74,32 @@ class _IntroPageState extends State<IntroPage> {
                       controller: pageCon,
                       scrollDirection: Axis.horizontal,
                       children: [
-                        infos(
+                        Infos(
                           title: 'Telegram',
                           subtitle1: "The world's fastest messaging app.",
                           subtitle2: "It is free and secure",
                           darkMode: darkMode,
                         ),
-                        infos(
+                        Infos(
                           title: 'Fast',
                           subtitle1: "Telegram delivers messages faster than",
                           subtitle2: "any other application",
                           darkMode: darkMode,
                         ),
-                        infos(
+                        Infos(
                           title: 'Free',
                           subtitle1:
                               "Telegram provides free unlimited cloud storage for",
                           subtitle2: "chats and media",
                           darkMode: darkMode,
                         ),
-                        infos(
+                        Infos(
                           title: 'Powerful',
                           subtitle1: "Telegram has no limits on",
                           subtitle2: "the size of your media and chats",
                           darkMode: darkMode,
                         ),
-                        infos(
+                        Infos(
                           title: 'Secure',
                           subtitle1: "Telegram keeps your messages safe",
                           subtitle2: "from hacker attacks",
@@ -130,7 +130,7 @@ class _IntroPageState extends State<IntroPage> {
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => RegPage(),
+                      builder: (context) => const RegPage(),
                     ),
                     (route) => false,
                   );
@@ -160,13 +160,13 @@ class _IntroPageState extends State<IntroPage> {
   }
 }
 
-class infos extends StatelessWidget {
+class Infos extends StatelessWidget {
   final String title;
   final String subtitle1;
   final String subtitle2;
   final bool darkMode;
 
-  const infos(
+  const Infos(
       {super.key,
       required this.title,
       required this.subtitle1,
