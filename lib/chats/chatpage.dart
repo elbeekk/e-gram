@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elbekgram/chats/profileview.dart';
+import 'package:elbekgram/messagemodel.dart';
 import 'package:elbekgram/usermodel.dart';
 import 'package:elbekgram/var_provider.dart';
 import 'package:elbekgram/widgets/messagemodel.dart';
@@ -23,6 +24,34 @@ class _ChatPageState extends State<ChatPage> {
   String groupChatId = '';
   String currentUserId = '';
   String peerId = '';
+  TextEditingController controller = TextEditingController();
+
+  static String getConversationId(String id) =>
+      FirebaseAuth.instance.currentUser!.uid.hashCode <= id.hashCode
+          ? "${FirebaseAuth.instance.currentUser!.uid}_$id"
+          : "${id}_${FirebaseAuth.instance.currentUser!.uid}";
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
+      UserModel user1) {
+    return FirebaseFirestore.instance
+        .collection('chats/${getConversationId(user1.uid)}/messages/')
+        .orderBy('sent', descending: true)
+        .snapshots();
+  }
+
+  static Future<void> sendMessage(UserModel user, String msg) async {
+    final time = DateTime.now().millisecondsSinceEpoch.toString();
+    final Message message = Message(
+        toUid: user.uid,
+        msg: msg,
+        read: '',
+        fromUid: FirebaseAuth.instance.currentUser!.uid,
+        sent: time,
+        type: Type.text);
+    final ref = FirebaseFirestore.instance
+        .collection('chats/${getConversationId(user.uid)}/messages/');
+    await ref.doc().set(message.toJson());
+  }
 
   @override
   void initState() {
@@ -83,8 +112,9 @@ class _ChatPageState extends State<ChatPage> {
                             children: [
                               CircleAvatar(
                                 radius: height * .025,
-                                backgroundImage: NetworkImage(
-                                    widget.userModel.userImages[widget.userModel.userImages.length-1]),
+                                backgroundImage: NetworkImage(widget
+                                        .userModel.userImages[
+                                    widget.userModel.userImages.length - 1]),
                               ),
                               const SizedBox(
                                 width: 15,
@@ -136,12 +166,12 @@ class _ChatPageState extends State<ChatPage> {
                               ),
                               PopupMenuButton(
                                 shape: const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(10))
-                                ),
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(10))),
                                 color: darkMode
                                     ? const Color(0xff303841)
                                     : const Color(0xffEEEEEE),
-                                itemBuilder: (context){
+                                itemBuilder: (context) {
                                   var list = <PopupMenuEntry<Object>>[
                                     const PopupMenuItem(
                                       child: Row(
@@ -153,7 +183,9 @@ class _ChatPageState extends State<ChatPage> {
                                               color: Colors.grey,
                                             ),
                                           ),
-                                          Text('Mute',),
+                                          Text(
+                                            'Mute',
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -191,7 +223,8 @@ class _ChatPageState extends State<ChatPage> {
                                           Padding(
                                             padding: EdgeInsets.only(right: 15),
                                             child: Icon(
-                                              MaterialCommunityIcons.brush_variant,
+                                              MaterialCommunityIcons
+                                                  .brush_variant,
                                               color: Colors.grey,
                                             ),
                                           ),
@@ -199,8 +232,23 @@ class _ChatPageState extends State<ChatPage> {
                                         ],
                                       ),
                                     ),
-                                    const PopupMenuItem(
-                                      child: Row(
+                                    PopupMenuItem(
+                                      onTap: () async {
+                                         await FirebaseFirestore
+                                            .instance
+                                            .collection('chats')
+                                            .doc(getConversationId(
+                                                widget.userModel.uid))
+                                            .collection('messages').get().then((value) {
+                                              for( var i in value.docs){
+                                                i.reference.delete();
+                                              }
+                                            },);
+                                            
+                                        print(
+                                            '__________________DELETING____________________');
+                                      },
+                                      child: const Row(
                                         children: [
                                           Padding(
                                             padding: EdgeInsets.only(right: 15),
@@ -219,7 +267,8 @@ class _ChatPageState extends State<ChatPage> {
                                           Padding(
                                             padding: EdgeInsets.only(right: 20),
                                             child: Icon(
-                                              MaterialCommunityIcons.delete_outline,
+                                              MaterialCommunityIcons
+                                                  .delete_outline,
                                               color: Colors.grey,
                                             ),
                                           ),
@@ -228,9 +277,13 @@ class _ChatPageState extends State<ChatPage> {
                                       ),
                                     ),
                                   ];
-                                  list.insert(1,const PopupMenuDivider(height: 5,));
+                                  list.insert(
+                                      1,
+                                      const PopupMenuDivider(
+                                        height: 5,
+                                      ));
                                   return list;
-                                } ,
+                                },
                                 child: Transform.rotate(
                                   angle: 3.14 / 1,
                                   child: SizedBox(
@@ -254,17 +307,60 @@ class _ChatPageState extends State<ChatPage> {
         body: Stack(
           children: [
             Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage(
-                      darkMode
-                          ? 'assets/darkback.jpeg'
-                          : 'assets/lightback.jpeg',
-                    ),
-                    fit: BoxFit.cover),
-              ),
-              child: ListView(),
-            ),
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                      image: AssetImage(
+                        darkMode
+                            ? 'assets/darkback.jpeg'
+                            : 'assets/lightback.jpeg',
+                      ),
+                      fit: BoxFit.cover),
+                ),
+                child: StreamBuilder(
+                  stream: getAllMessages(widget.userModel),
+                  builder: (context, snapshot) {
+                    return ListView.builder(
+                        padding: const EdgeInsets.only(bottom: 80),
+                        reverse: true,
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          final message =
+                              Message.fromJson(snapshot.data!.docs[index]);
+                          final isMe = message.fromUid ==
+                                  FirebaseAuth.instance.currentUser!.uid
+                              ? true
+                              : false;
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 9, vertical: 6),
+                            child: Row(
+                              mainAxisAlignment: isMe
+                                  ? MainAxisAlignment.end
+                                  : MainAxisAlignment.start,
+                              children: [
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue,
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: const Radius.circular(15),
+                                      topRight: const Radius.circular(15),
+                                      bottomLeft: isMe
+                                          ? const Radius.circular(15)
+                                          : const Radius.circular(0),
+                                      bottomRight: !isMe
+                                          ? const Radius.circular(15)
+                                          : const Radius.circular(0),
+                                    ),
+                                  ),
+                                  padding: const EdgeInsets.all(10),
+                                  child: Text(message.msg),
+                                ),
+                              ],
+                            ),
+                          );
+                        });
+                  },
+                )),
             Positioned(
               bottom: 0,
               right: 0,
@@ -288,6 +384,7 @@ class _ChatPageState extends State<ChatPage> {
                     Expanded(
                         flex: 13,
                         child: TextField(
+                          controller: controller,
                           keyboardAppearance:
                               darkMode ? Brightness.dark : Brightness.light,
                           cursorHeight: height * .035,
@@ -307,7 +404,12 @@ class _ChatPageState extends State<ChatPage> {
                     Expanded(
                       flex: 2,
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          if (controller.text.isNotEmpty) {
+                            sendMessage(widget.userModel, controller.text);
+                            controller.text = '';
+                          }
+                        },
                         child: Container(
                           height: height * .08,
                           padding: const EdgeInsets.only(

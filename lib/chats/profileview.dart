@@ -182,6 +182,7 @@ class _MyProfileState extends State<MyProfile> {
                                                         await Dio().download(urlImage, path);
                                                         await GallerySaver.saveImage(path,albumName: 'Elbekgram',);
                                                       }catch(e){
+                                                        print('Error1');
                                                       }
                                                       },
                                                     child: const Row(
