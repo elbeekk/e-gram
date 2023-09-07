@@ -103,11 +103,12 @@ class _EditPageState extends State<EditPage> {
     timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       await FirebaseAuth.instance.currentUser!.reload();
       if (FirebaseAuth.instance.currentUser!.emailVerified) {
+        await FirebaseFirestore.instance.collection('users').doc(
+            widget.user.docId).update({'userEmail': widget.controller.text.trim()});
         print('################ VERIFIED #################');
         Navigator.pop(context);
         Navigator.pop(context);
-        await FirebaseFirestore.instance.collection('users').doc(
-            widget.user.docId).update({'userEmail': widget.controller.text});
+
         timer.cancel();
       }
     });
@@ -143,9 +144,9 @@ class _EditPageState extends State<EditPage> {
                if(widget.title=='Email'){
                  tempEmail= await FirebaseAuth.instance.currentUser!.email;
                    try{
-                     if(FirebaseAuth.instance.currentUser!.email!=widget.controller.text){
+                     if(FirebaseAuth.instance.currentUser!.email!=widget.controller.text.trim()){
                        await FirebaseAuth.instance.currentUser!.updateEmail(
-                           widget.controller.text);
+                           widget.controller.text.trim());
                        await FirebaseAuth.instance.currentUser!.sendEmailVerification();
                        showCupertinoModalPopup1(context, 'We have sent a confirmation link to your new email, please check your email.');
                        push();

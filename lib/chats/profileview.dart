@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:http/http.dart'as http;
 import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
 import 'package:elbekgram/usermodel.dart';
@@ -11,6 +11,7 @@ import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class MyProfile extends StatefulWidget {
   UserModel userModel;
@@ -142,8 +143,18 @@ class _MyProfileState extends State<MyProfile> {
                                               itemBuilder: (context) {
                                                 var list =
                                                 <PopupMenuEntry<Object>>[
-                                                  const PopupMenuItem(
-                                                    child: Row(
+                                                  PopupMenuItem(
+                                                    onTap: () async {
+                                                      final urlImage = widget.userModel.userImages[currentIndex];
+                                                      final url = Uri.parse(urlImage);
+                                                      final response = await http.get(url);
+                                                      final bytes = response.bodyBytes;
+                                                      final temp = await getTemporaryDirectory();
+                                                      final path = "${temp.path}/image.jpg";
+                                                      File(path).writeAsBytesSync(bytes);
+                                                      await Share.shareFiles([path],text: 'Profile photo of ${widget.userModel.userFName} ${widget.userModel.userLName} in Elbekgram');
+                                                    },
+                                                    child: const Row(
                                                       children: [
                                                         Padding(
                                                           padding:
@@ -165,10 +176,16 @@ class _MyProfileState extends State<MyProfile> {
                                                     ),
                                                   ),
                                                    PopupMenuItem(
-                                                    onTap: (){
-                                                      String fileName = "${widget.userModel.userName.trim()}_profile${currentIndex+1}";
-                                                      downloadFile(widget.userModel.userImages[currentIndex],fileName);
-
+                                                    onTap: () async {
+                                                      final urlImage = widget.userModel.userImages[widget.userModel.userImages.length-1-currentIndex];
+                                                      try{
+                                                        final tempDir = await getTemporaryDirectory();
+                                                        final path = "${tempDir.path}/${widget.userModel.uid}$currentIndex.jpg";
+                                                        await Dio().download(urlImage, path);
+                                                        await GallerySaver.saveImage(path,albumName: 'Elbekgram',).whenComplete(() => print('||||||||||||||| SAVED ||||||||||||||'));
+                                                      }catch(e){
+                                                        print("############### ${e.toString()} ###############");
+                                                      }
                                                       },
                                                     child: const Row(
                                                       children: [
@@ -301,7 +318,7 @@ class _MyProfileState extends State<MyProfile> {
                           SizedBox(
                               width: width * 0.4,
                               child: Text(
-                                widget.userModel.userName,
+                                "${widget.userModel.userFName} ${widget.userModel.userLName}",
                                 style: const TextStyle(fontSize: 15),
                                 overflow: TextOverflow.ellipsis,
                               )),

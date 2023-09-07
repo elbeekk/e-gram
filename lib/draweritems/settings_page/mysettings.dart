@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:gallery_saver/gallery_saver.dart';
+import 'package:http/http.dart'as http;
 import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elbekgram/draweritems/settings_page/editpage.dart';
@@ -7,8 +11,10 @@ import 'package:elbekgram/var_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 class MySettings extends StatefulWidget {
   const MySettings({super.key});
@@ -239,7 +245,18 @@ class _MySettingsState extends State<MySettings> {
                                                       var list =
                                                           <PopupMenuEntry<
                                                               Object>>[
-                                                        const PopupMenuItem(
+                                                                PopupMenuItem(
+                                                          onTap:() async {
+                                                            final urlImage = user.userImages[currentIndex];
+                                                            final url = Uri.parse(urlImage);
+                                                            final response = await http.get(url);
+                                                            final bytes = response.bodyBytes;
+                                                            final temp = await getTemporaryDirectory();
+                                                            final path = "${temp.path}/image.jpg";
+                                                            File(path).writeAsBytesSync(bytes);
+                                                            await Share.shareFiles([path],text: 'Profile photo of ${user.userFName} ${user.userLName} in Elbekgram');
+
+                                                          },
                                                           child: Row(
                                                             children: [
                                                               Padding(
@@ -264,10 +281,18 @@ class _MySettingsState extends State<MySettings> {
                                                           ),
                                                         ),
                                                         PopupMenuItem(
-                                                          onTap: () {
-                                                            String fileName =
-                                                                "${user.userName.trim()}_profile${currentIndex + 1}";
-                                                          },
+                                                          onTap: () async {
+
+                                                            final urlImage = user.userImages[user.userImages.length-1-currentIndex];
+                                                            try{
+                                                              final tempDir = await getTemporaryDirectory();
+                                                              final path = "${tempDir.path}/${user.uid}$currentIndex.jpg";
+                                                              await Dio().download(urlImage, path);
+                                                              await GallerySaver.saveImage(path,albumName: 'Elbekgram',).whenComplete(() => print('||||||||||||||| SAVED ||||||||||||||'));
+                                                            }catch(e){
+                                                              print("############### ${e.toString()} ###############");
+                                                            }
+                                                            },
                                                           child: const Row(
                                                             children: [
                                                               Padding(
@@ -418,7 +443,7 @@ class _MySettingsState extends State<MySettings> {
                                 SizedBox(
                                     width: width * 0.4,
                                     child: Text(
-                                      user.userName,
+                                      "${user.userFName} ${user.userLName}",
                                       style: const TextStyle(fontSize: 15),
                                       overflow: TextOverflow.ellipsis,
                                     )),

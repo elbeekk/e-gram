@@ -64,7 +64,8 @@ class _CreateAccountState extends State<CreateAccount> {
       "docId":"",
       'userBio': '',
       'userEmail':widget.email,
-      'userName': "${firstName.text} ${lastName.text}",
+      'userFirstName': firstName.text,
+      'userLastName': lastName.text,
       'createdAt': DateTime.now().toString(),
       'userImages': [
        link.toString()

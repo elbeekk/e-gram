@@ -9,7 +9,8 @@ class UserModel {
   final String userBio;
   final String userEmail;
   final List userImages;
-  final String userName;
+  final String userFName;
+  final String userLName;
 
   UserModel({
     required this.city,
@@ -21,7 +22,8 @@ class UserModel {
     required this.userBio,
     required this.userEmail,
     required this.userImages,
-    required this.userName,
+    required this.userFName,
+    required this.userLName,
   });
   Map<String, dynamic> toJson(){
     return {
@@ -33,7 +35,8 @@ class UserModel {
       "uid": uid,
       "userBio": userBio,
       "userImages": userImages,
-      "userName": userName,
+      "userFirstName": userFName,
+      "userLastName": userLName,
     };
   }
   factory UserModel.fromJson(QueryDocumentSnapshot<Map<String,dynamic>> map){
@@ -47,6 +50,7 @@ class UserModel {
         userBio: map['userBio'],
         userEmail: map['userEmail'],
         userImages: map['userImages'],
-        userName: map['userName']);
+        userFName: map['userFirstName'],
+        userLName: map['userLastName']);
   }
 }

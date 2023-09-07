@@ -22,8 +22,7 @@ class _MyDrawerState extends State<MyDrawer> {
   double turns = 1;
   double turns1 = 1;
   bool isOpen = false;
-  UserModel user = UserModel(city: 'None', country:'None', createdAt: 'None', docId: 'None', state: 'None', uid: 'None', userBio: 'None', userEmail: 'None', userImages: ['None'], userName: 'None');
-
+  late UserModel user;
   @override
   Widget build(BuildContext context) {
     bool darkMode = Provider.of<VarProvider>(context).darkMode;
@@ -76,7 +75,7 @@ class _MyDrawerState extends State<MyDrawer> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                 user.userName,
+                                  "${user.userFName} ${user.userLName}",
                                   style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 17,

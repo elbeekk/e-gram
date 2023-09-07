@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elbekgram/chats/chatpage.dart';
 import 'package:elbekgram/pages/intro.dart';
@@ -18,7 +21,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
-
+  late Timer timer;
   @override
   Widget build(BuildContext context) {
     bool darkMode = Provider
@@ -30,15 +33,15 @@ class _HomePageState extends State<HomePage> {
         key: _key,
         drawer: const MyDrawer(),
         backgroundColor: darkMode
-            ? Color(0xff303841)
-            : Color(0xffEEEEEE),
+            ? const Color(0xff303841)
+            : const Color(0xffEEEEEE),
         appBar: AppBar(
           centerTitle: false,
           elevation: 0,
           backgroundColor: darkMode
-              ? Color(0xff47555E)
-              : Color(0xff7AA5D2),
-          title: const Text('Elbekgram'),
+              ? const Color(0xff47555E)
+              : const Color(0xff7AA5D2),
+          title: const Text('Elbekgram') ,
           leading: InkWell(
             borderRadius: BorderRadius.circular(20),
               onTap: () => _key.currentState!.openDrawer(),
@@ -51,7 +54,7 @@ class _HomePageState extends State<HomePage> {
               },
               child: Padding(
                 padding: EdgeInsets.only(right: width*.05,left: width*.05),
-                child: Icon(Icons.search),
+                child: const Icon(Icons.search),
               ),
             )
           ],
@@ -62,8 +65,8 @@ class _HomePageState extends State<HomePage> {
           },
           elevation: 0,
           backgroundColor: darkMode
-              ? Color(0xff47555E)
-              : Color(0xff7AA5D2),
+              ? const Color(0xff47555E)
+              : const Color(0xff7AA5D2),
           child: const Icon(Icons.edit, color: Colors.white,),
         ),
         body: StreamBuilder(
@@ -125,7 +128,7 @@ class _HomePageState extends State<HomePage> {
                       radius: 25,
                       backgroundColor: Colors.white,
                     ),
-                    title: Text(user.userName),
+                    title: Text("${user.userFName} ${user.userLName}"),
                     subtitle: Text(user.userEmail),
                   ),
                 );

@@ -95,7 +95,7 @@ class _ChatPageState extends State<ChatPage> {
                                   SizedBox(
                                     width: width * 0.45,
                                     child: Text(
-                                      widget.userModel.userName,
+                                      "${widget.userModel.userFName} ${widget.userModel.userLName}",
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
