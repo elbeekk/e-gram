@@ -45,29 +45,33 @@ class _CreateAccountState extends State<CreateAccount> {
          link = await ref.getDownloadURL();
        });
       } catch (onError) {
-        print("Error");
+        print("Error (could not get URL)");
+        setState(() {
+          link = 'https://t4.ftcdn.net/jpg/00/65/77/27/240_F_65772719_A1UV5kLi5nCEWI0BNLLiFaBPEkUbv5Fv.jpg';
+        });
       }
     });
   }
-  
+
 
 
   createAc() async {
     var uid = FirebaseAuth.instance.currentUser!.uid;
-    var users = FirebaseFirestore.instance.collection('users');
-    users.add({
+    var users = FirebaseFirestore.instance.collection('users').doc(uid.toString());
+    users.set({
       'country': widget.country,
       'state': widget.state,
       'city': widget.city,
       'uid': uid,
-      "docId":"",
       'userBio': '',
       'userEmail':widget.email,
       'userFirstName': firstName.text,
       'userLastName': lastName.text,
       'createdAt': DateTime.now().toString(),
       'userImages': [
-       link.toString()
+       if(link.toString()=='')'https://t4.ftcdn.net/jpg/00/65/77/27/240_F_65772719_A1UV5kLi5nCEWI0BNLLiFaBPEkUbv5Fv.jpg',
+       if(link.toString()!='')link.toString(),
+
       ],
     });
   }
@@ -117,7 +121,7 @@ class _CreateAccountState extends State<CreateAccount> {
                 onPressed: () {
                   if (firstName.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      SnackBar( behavior: SnackBarBehavior.floating,
                         content: const Text(
                           'First name is required',
                           style: TextStyle(color: Colors.white),
@@ -194,7 +198,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         },
                       );
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar( behavior: SnackBarBehavior.floating,
                         content: const Text('Please pick an image for profile photo'),
                         backgroundColor: darkMode
                             ? Colors.red.shade900

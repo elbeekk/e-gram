@@ -20,37 +20,32 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   late Timer timer;
+
   @override
   Widget build(BuildContext context) {
-    bool darkMode = Provider
-        .of<VarProvider>(context)
-        .darkMode;
+    bool darkMode = Provider.of<VarProvider>(context).darkMode;
     double width = MediaQuery.sizeOf(context).width;
     return Scaffold(
         key: _key,
         drawer: const MyDrawer(),
-        backgroundColor: darkMode
-            ? const Color(0xff303841)
-            : const Color(0xffEEEEEE),
+        backgroundColor:
+            darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
         appBar: AppBar(
           centerTitle: false,
           elevation: 0,
-          backgroundColor: darkMode
-              ? const Color(0xff47555E)
-              : const Color(0xff7AA5D2),
-          title: const Text('Elbekgram') ,
+          backgroundColor:
+              darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
+          title: const Text('Elbekgram'),
           leading: InkWell(
-            borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20),
               onTap: () => _key.currentState!.openDrawer(),
               child: const Icon(Icons.menu)),
-          actions:  [
+          actions: [
             InkWell(
               borderRadius: BorderRadius.circular(20),
-              onTap: () {
-
-              },
+              onTap: () {},
               child: Padding(
-                padding: EdgeInsets.only(right: width*.05,left: width*.05),
+                padding: EdgeInsets.only(right: width * .05, left: width * .05),
                 child: const Icon(Icons.search),
               ),
             )
@@ -61,10 +56,12 @@ class _HomePageState extends State<HomePage> {
             FirebaseAuth.instance.signOut();
           },
           elevation: 0,
-          backgroundColor: darkMode
-              ? const Color(0xff47555E)
-              : const Color(0xff7AA5D2),
-          child: const Icon(Icons.edit, color: Colors.white,),
+          backgroundColor:
+              darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
+          child: const Icon(
+            Icons.edit,
+            color: Colors.white,
+          ),
         ),
         body: StreamBuilder(
           stream: FirebaseFirestore.instance.collection('users').snapshots(),
@@ -78,37 +75,35 @@ class _HomePageState extends State<HomePage> {
             if (snapshot.data!.docs.isEmpty) {
               return Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(''),
+                  SizedBox(
+                      height: MediaQuery.sizeOf(context).height * 0.4,
+                      child: Lottie.asset('assets/welcomel.json')),
+                  Column(
                     children: [
-                      const Text(''),
-                      SizedBox(
-                          height: MediaQuery
-                              .sizeOf(context)
-                              .height * 0.4,
-                          child: Lottie.asset('assets/welcomel.json')),
-                      Column(
-                        children: [
-                          Text(
-                            'Welcome to Elbekgram',
-                            style: TextStyle(
-                                color: darkMode ? Colors.white : Colors.black,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 20),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 30, vertical: 10),
-                            child: Text(
-                              'Start messaging by tapping the pencil button in the bottom right corner.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Colors.grey.shade500),
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Welcome to Elbekgram',
+                        style: TextStyle(
+                            color: darkMode ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 20),
                       ),
-                      const Text(''),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 10),
+                        child: Text(
+                          'Start messaging by tapping the pencil button in the bottom right corner.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey.shade500),
+                        ),
+                      ),
                     ],
-                  ));
+                  ),
+                  const Text(''),
+                ],
+              ));
             }
             return ListView.builder(
               itemCount: snapshot.data!.docs.length,
@@ -116,12 +111,21 @@ class _HomePageState extends State<HomePage> {
                 UserModel user = UserModel.fromJson(snapshot.data!.docs[index]);
                 return InkWell(
                   autofocus: true,
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ChatPage(uid: user.uid,userModel: user,),));
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ChatPage(
+                          uid: user.uid,
+                          userModel: user,
+                        ),
+                      ),
+                    );
                   },
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundImage: NetworkImage(user.userImages[user.userImages.length-1]),
+                      backgroundImage: NetworkImage(
+                          user.userImages[user.userImages.length - 1]),
                       radius: 25,
                       backgroundColor: Colors.white,
                     ),
@@ -129,12 +133,10 @@ class _HomePageState extends State<HomePage> {
                     subtitle: Text(user.userEmail),
                   ),
                 );
-            },);
+              },
+            );
           },
-        )
-
-
-    );
+        ));
   }
 }
 
@@ -156,5 +158,4 @@ class Customshape extends CustomClipper<Path> {
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
     return true;
   }
-
 }

@@ -54,6 +54,7 @@ dependencies:
   permission_handler: ^10.4.3
   http: ^0.13.6
   share_plus: ^7.1.0
+  image_cropper: ^4.0.1
 
 dev_dependencies:
   flutter_test:

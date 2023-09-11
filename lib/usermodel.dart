@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
   final String city;
   final String country;
   final String createdAt;
-  final String docId;
   final String state;
   final String uid;
   final String userBio;
@@ -16,7 +16,6 @@ class UserModel {
     required this.city,
     required this.country,
     required this.createdAt,
-    required this.docId,
     required this.state,
     required this.uid,
     required this.userBio,
@@ -25,26 +24,27 @@ class UserModel {
     required this.userFName,
     required this.userLName,
   });
-  Map<String, dynamic> toJson(){
+
+  Map<String, dynamic> toJson() {
     return {
       "city": city,
       "country": country,
       "createdAt": createdAt,
-      "docId": docId,
       "state": state,
       "uid": uid,
       "userBio": userBio,
+      "userEmail": userEmail,
       "userImages": userImages,
       "userFirstName": userFName,
       "userLastName": userLName,
     };
   }
-  factory UserModel.fromJson(QueryDocumentSnapshot<Map<String,dynamic>> map){
+
+  factory UserModel.fromJson(QueryDocumentSnapshot<Map<String, dynamic>> map) {
     return UserModel(
         city: map['city'],
-        country:  map['country'],
+        country: map['country'],
         createdAt: map['createdAt'],
-        docId: map['docId'],
         state: map['state'],
         uid: map['uid'],
         userBio: map['userBio'],

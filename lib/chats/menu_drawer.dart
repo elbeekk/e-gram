@@ -37,12 +37,10 @@ class _MyDrawerState extends State<MyDrawer> {
             return const Center(
               child: CircularProgressIndicator(),
             );
-
           }
-          for(var i in snapshot.data!.docs){
-            if(i['uid']==FirebaseAuth.instance.currentUser!.uid){
-              user= UserModel.fromJson(i);
-              FirebaseFirestore.instance.collection('users').doc(i.id).update({"docId":i.id});
+          for (var i in snapshot.data!.docs){
+            if(i.id==FirebaseAuth.instance.currentUser!.uid){
+              user = UserModel.fromJson(i);
             }
           }
           return SingleChildScrollView(

@@ -1,8 +1,9 @@
 import 'dart:io';
-import 'package:http/http.dart'as http;
+import 'package:elbekgram/usermodel.dart';
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:animations/animations.dart';
 import 'package:dio/dio.dart';
-import 'package:elbekgram/usermodel.dart';
 import 'package:elbekgram/var_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
@@ -24,7 +25,6 @@ class _MyProfileState extends State<MyProfile> {
   bool isMuted = true;
   bool isStreched = false;
   int currentIndex = 0;
-
   @override
   Widget build(BuildContext context) {
     var currentPlatform = Theme.of(context).platform;
@@ -33,14 +33,14 @@ class _MyProfileState extends State<MyProfile> {
     double width = MediaQuery.sizeOf(context).width;
     return Scaffold(
         backgroundColor:
-            darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
+        darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
               elevation: 0,
               pinned: true,
               backgroundColor:
-                  darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
+              darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
               actions: [
                 InkWell(
                   borderRadius: BorderRadius.circular(15),
@@ -58,14 +58,6 @@ class _MyProfileState extends State<MyProfile> {
                     child: const Icon(Icons.call),
                   ),
                 ),
-                InkWell(
-                  borderRadius: BorderRadius.circular(15),
-                  onTap: () {},
-                  child: SizedBox(
-                    width: width * 0.13,
-                    child: const Icon(Icons.menu),
-                  ),
-                ),
               ],
               leading: GestureDetector(
                 onTap: () {
@@ -73,13 +65,13 @@ class _MyProfileState extends State<MyProfile> {
                 },
                 child: currentPlatform == TargetPlatform.android
                     ? Icon(
-                        Icons.arrow_back,
-                        color: darkMode ? Colors.white : Colors.white,
-                      )
+                  Icons.arrow_back,
+                  color: darkMode ? Colors.white : Colors.white,
+                )
                     : Icon(
-                        Icons.arrow_back_ios,
-                        color: darkMode ? Colors.white : Colors.white,
-                      ),
+                  Icons.arrow_back_ios,
+                  color: darkMode ? Colors.white : Colors.white,
+                ),
               ),
               expandedHeight: height * 0.15,
               stretch: true,
@@ -96,13 +88,15 @@ class _MyProfileState extends State<MyProfile> {
                       closedElevation: 0,
                       closedBuilder: (context, action) => CircleAvatar(
                         radius: height * 0.026,
-                        backgroundImage:
-                            NetworkImage(widget.userModel.userImages[widget.userModel.userImages.length-1]),
+                        backgroundImage: NetworkImage(
+                            widget.userModel.userImages[
+                            widget.userModel.userImages.length - 1]),
                       ),
                       openBuilder: (context, action) {
-                        return StatefulBuilder(builder: (context, setState1){
+                        return StatefulBuilder(builder: (context, setState1) {
                           return Container(
-                            decoration: const BoxDecoration(color: Colors.black),
+                            decoration:
+                            const BoxDecoration(color: Colors.black),
                             height: height,
                             width: width,
                             child: SafeArea(
@@ -112,8 +106,9 @@ class _MyProfileState extends State<MyProfile> {
                                     children: [
                                       Padding(
                                         padding: const EdgeInsets.only(
-                                            top: 20,
-                                            left: 25, right: 15),
+                                          top: 20,
+                                          left: 25,
+                                        ),
                                         child: Row(
                                           mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -134,23 +129,44 @@ class _MyProfileState extends State<MyProfile> {
                                               ),
                                             ),
                                             PopupMenuButton(
-                                              shape: const RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.all(
-                                                      Radius.circular(10))),
+                                              icon: const Icon(
+                                                Ionicons.ellipsis_vertical,
+                                                color: Colors.white,
+                                              ),
+                                              surfaceTintColor: Colors.white,
+                                              shape:
+                                              const RoundedRectangleBorder(
+                                                  borderRadius:
+                                                  BorderRadius.all(
+                                                      Radius.circular(
+                                                          10))),
                                               color: const Color(0xff303841),
                                               itemBuilder: (context) {
                                                 var list =
                                                 <PopupMenuEntry<Object>>[
                                                   PopupMenuItem(
                                                     onTap: () async {
-                                                      final urlImage = widget.userModel.userImages[currentIndex];
-                                                      final url = Uri.parse(urlImage);
-                                                      final response = await http.get(url);
-                                                      final bytes = response.bodyBytes;
-                                                      final temp = await getTemporaryDirectory();
-                                                      final path = "${temp.path}/image.jpg";
-                                                      File(path).writeAsBytesSync(bytes);
-                                                      await Share.shareFiles([path],text: 'Profile photo of ${widget.userModel.userFName} ${widget.userModel.userLName} in Elbekgram');
+                                                      final urlImage = widget
+                                                          .userModel
+                                                          .userImages[
+                                                      currentIndex];
+                                                      final url =
+                                                      Uri.parse(urlImage);
+                                                      final response =
+                                                      await http.get(url);
+                                                      final bytes =
+                                                          response.bodyBytes;
+                                                      final temp =
+                                                      await getTemporaryDirectory();
+                                                      final path =
+                                                          "${temp.path}/image.jpg";
+                                                      File(path)
+                                                          .writeAsBytesSync(
+                                                          bytes);
+                                                      await Share.shareFiles(
+                                                          [path],
+                                                          text:
+                                                          'Profile photo of ${widget.userModel.userFName} ${widget.userModel.userLName} in Elbekgram');
                                                     },
                                                     child: const Row(
                                                       children: [
@@ -173,18 +189,33 @@ class _MyProfileState extends State<MyProfile> {
                                                       ],
                                                     ),
                                                   ),
-                                                   PopupMenuItem(
+                                                  PopupMenuItem(
                                                     onTap: () async {
-                                                      final urlImage = widget.userModel.userImages[widget.userModel.userImages.length-1-currentIndex];
-                                                      try{
-                                                        final tempDir = await getTemporaryDirectory();
-                                                        final path = "${tempDir.path}/${widget.userModel.uid}$currentIndex.jpg";
-                                                        await Dio().download(urlImage, path);
-                                                        await GallerySaver.saveImage(path,albumName: 'Elbekgram',);
-                                                      }catch(e){
+                                                      final urlImage = widget
+                                                          .userModel
+                                                          .userImages[widget
+                                                          .userModel
+                                                          .userImages
+                                                          .length -
+                                                          1 -
+                                                          currentIndex];
+                                                      try {
+                                                        final tempDir =
+                                                        await getTemporaryDirectory();
+                                                        final path =
+                                                            "${tempDir.path}/${widget.userModel.uid}$currentIndex.jpg";
+                                                        await Dio().download(
+                                                            urlImage, path);
+                                                        await GallerySaver
+                                                            .saveImage(
+                                                          path,
+                                                          albumName:
+                                                          'Elbekgram',
+                                                        );
+                                                      } catch (e) {
                                                         print('Error1');
                                                       }
-                                                      },
+                                                    },
                                                     child: const Row(
                                                       children: [
                                                         Padding(
@@ -214,24 +245,12 @@ class _MyProfileState extends State<MyProfile> {
                                                     ));
                                                 return list;
                                               },
-                                              child: Transform.rotate(
-                                                angle: 3.14 / 1,
-                                                child: SizedBox(
-                                                  width: height * .047,
-                                                  height: height * .047,
-                                                  child: const Center(
-                                                      child: Icon(
-                                                        Icons.menu,
-                                                        color: Colors.white,
-                                                      )),
-                                                ),
-                                              ),
-                                            )
+                                            ),
                                           ],
                                         ),
                                       ),
                                       SizedBox(
-                                        height: height*0.04,
+                                        height: height * 0.04,
                                       ),
                                       Row(
                                         mainAxisAlignment:
@@ -264,24 +283,34 @@ class _MyProfileState extends State<MyProfile> {
                                       Column(
                                         children: [
                                           Container(
-                                            margin:
-                                            EdgeInsets.only(top: height * 0.12),
+                                            margin: EdgeInsets.only(
+                                                top: height * 0.12),
                                             height: height * 0.4,
                                             width: width,
                                             child: PageView.builder(
                                               pageSnapping: true,
                                               onPageChanged: (value) {
-                                                setState1(() {
-                                                  currentIndex=value;
-                                                },);
+                                                setState1(
+                                                      () {
+                                                    currentIndex = value;
+                                                  },
+                                                );
                                               },
-                                              itemCount: widget.userModel.userImages.length,
+                                              itemCount: widget
+                                                  .userModel.userImages.length,
                                               itemBuilder: (context, index) =>
                                                   Container(
                                                     decoration: BoxDecoration(
-                                                        image: DecorationImage(image:
-                                                        NetworkImage(widget.userModel.userImages[widget.userModel.userImages.length-1-index]),fit: BoxFit.cover)
-                                                    ),
+                                                        image: DecorationImage(
+                                                            image: NetworkImage(widget
+                                                                .userModel
+                                                                .userImages[widget
+                                                                .userModel
+                                                                .userImages
+                                                                .length -
+                                                                1 -
+                                                                index]),
+                                                            fit: BoxFit.cover)),
                                                   ),
                                             ),
                                           ),
@@ -339,120 +368,191 @@ class _MyProfileState extends State<MyProfile> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: EdgeInsets.only(left: width * 0.05, top: 15),
+                    padding: EdgeInsets.only(top: 15),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Row(),
-                        const Text(
-                          'Info',
-                          style: TextStyle(
-                              color: Color(0xff7AA5D2),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 18),
+                        Padding(
+                          padding:  EdgeInsets.only(left: width * 0.05),
+                          child: const Text(
+                            'Info',
+                            style: TextStyle(
+                                color: Color(0xff7AA5D2),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 18),
+                          ),
                         ),
                         if (widget.userModel.userBio != '')
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                height: 5,
+                          InkWell(
+                            onLongPress: () async {
+                              if(widget.userModel.userBio!='') {
+                                await Clipboard.setData(
+                                    ClipboardData(text: widget.userModel.userBio));
+                                ScaffoldMessenger.of(context).showSnackBar(
+
+                                    SnackBar(
+                                        behavior: SnackBarBehavior.floating,
+                                        duration: const Duration(seconds: 1),
+                                        backgroundColor: darkMode
+                                            ? const Color(0xff47555E)
+                                            : const Color(0xff7AA5D2),
+                                        content: const Row(
+                                          children: [
+                                            Icon(
+                                              Icons.copy,
+                                              color: Colors.white,
+                                            ),
+                                            Text(
+                                              '  Bio copied to clipboard',
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            )
+                                          ],
+                                        )));
+                              }
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.only(left: width * 0.05,bottom: 5),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    widget.userModel.userBio,
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  const Text(
+                                    'Bio',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                widget.userModel.userBio,
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                              const SizedBox(
-                                height: 5,
-                              ),
-                              const Text(
-                                'Bio',
-                                style: TextStyle(color: Colors.grey),
-                              ),
-                            ],
+                            ),
                           ),
-                        const SizedBox(
-                          height: 12,
-                        ),
-                        Text(
-                          widget.userModel.userEmail,
-                          style: TextStyle(
-                              color: darkMode ? Colors.white : Colors.black,
-                              fontSize: 16),
-                        ),
-                        const SizedBox(
-                          height: 5,
-                        ),
-                        const Text(
-                          'Email',
-                          style: TextStyle(color: Colors.grey),
+                        InkWell(
+                          onLongPress: () async {
+                            await Clipboard.setData(
+                                ClipboardData(text: widget.userModel.userEmail));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: const Duration(seconds: 1),
+                                    backgroundColor: darkMode
+                                        ? const Color(0xff47555E)
+                                        : const Color(0xff7AA5D2),
+                                    content: const Row(
+                                      children: [
+                                        Icon(
+                                          Icons.copy,
+                                          color: Colors.white,
+                                        ),
+                                        Text(
+                                          '  Email copied to clipboard',
+                                          style: TextStyle(
+                                              color: Colors.white),
+                                        )
+                                      ],
+                                    )));
+                          },
+                          child: Padding(
+                            padding:  EdgeInsets.only(left: width * 0.05,top: 5,bottom: 5),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Row(),
+                                Text(
+                                  widget.userModel.userEmail,
+                                  style: TextStyle(
+                                      color: darkMode ? Colors.white : Colors.black,
+                                      fontSize: 16),
+                                ),
+                                const SizedBox(
+                                  height: 7,
+                                ),
+                                const Text(
+                                  'Email',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                         Divider(
                           color: darkMode ? Colors.black : Colors.grey,
                           thickness: 0.2,
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(right: width * 0.07, top: 5),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Notifications',
-                                    style: TextStyle(
-                                        color: darkMode
-                                            ? Colors.white
-                                            : Colors.black,
-                                        fontSize: 16),
-                                  ),
-                                  const SizedBox(
-                                    height: 5,
-                                  ),
-                                  Text(
-                                    isMuted ? 'Off' : 'On',
-                                    style: const TextStyle(color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                              VerticalDivider(
-                                color: darkMode ? Colors.black : Colors.grey,
-                                thickness: 10,
-                                indent: 0,
-                                width: 10,
-                                endIndent: 0,
-                              ),
-                              SizedBox(
-                                height: height * 0.05,
-                                child: Row(
+                        InkWell(
+                          onTap: () {},
+                          child: Padding(
+                            padding: EdgeInsets.only(right: width * 0.07,left: width * 0.05, top: 5,bottom: 6),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    VerticalDivider(
-                                      color:
-                                          darkMode ? Colors.black : Colors.grey,
-                                      thickness: .2,
-                                      indent: 5,
-                                      width: 2,
-                                      endIndent: 5,
+                                    Text(
+                                      'Notifications',
+                                      style: TextStyle(
+                                          color: darkMode
+                                              ? Colors.white
+                                              : Colors.black,
+                                          fontSize: 16),
                                     ),
                                     const SizedBox(
-                                      width: 10,
+                                      height: 5,
                                     ),
-                                    Switch.adaptive(
-                                      activeColor: darkMode
-                                          ? const Color(0xff47555E)
-                                          : const Color(0xff7AA5D2),
-                                      value: !isMuted,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          isMuted = !isMuted;
-                                        });
-                                      },
+                                    Text(
+                                      isMuted ? 'Off' : 'On',
+                                      style: const TextStyle(color: Colors.grey),
                                     ),
                                   ],
                                 ),
-                              )
-                            ],
+                                VerticalDivider(
+                                  color: darkMode ? Colors.black : Colors.grey,
+                                  thickness: 10,
+                                  indent: 0,
+                                  width: 10,
+                                  endIndent: 0,
+                                ),
+                                SizedBox(
+                                  height: height * 0.05,
+                                  child: Row(
+                                    children: [
+                                      VerticalDivider(
+                                        color:
+                                        darkMode ? Colors.black : Colors.grey,
+                                        thickness: .2,
+                                        indent: 5,
+                                        width: 2,
+                                        endIndent: 5,
+                                      ),
+                                      const SizedBox(
+                                        width: 10,
+                                      ),
+                                      Switch.adaptive(
+                                        activeColor: darkMode
+                                            ? const Color(0xff47555E)
+                                            : const Color(0xff7AA5D2),
+                                        value: !isMuted,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            isMuted = !isMuted;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -465,7 +565,7 @@ class _MyProfileState extends State<MyProfile> {
         ));
   }
 
-  Future<File?> downloadFile(userImag, String fileName) async{
+  Future<File?> downloadFile(userImag, String fileName) async {
     final appStorage = await getApplicationDocumentsDirectory();
     final file = File("${appStorage.path}/$fileName");
     final response = await Dio().get(
@@ -479,6 +579,5 @@ class _MyProfileState extends State<MyProfile> {
     raf.writeFromSync(response.data);
     await raf.close();
     return file;
-
   }
 }

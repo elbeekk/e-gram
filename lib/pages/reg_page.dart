@@ -278,7 +278,7 @@ class _RegPageState extends State<RegPage> {
                             "We have sent a confirmation link to your email, please check your email.",
                             true);
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar( behavior: SnackBarBehavior.floating,
                             backgroundColor: darkMode
                                 ? Colors.red.shade900
                                 : Colors.red.shade200,
@@ -303,7 +303,7 @@ class _RegPageState extends State<RegPage> {
 
   Future<void> registration(BuildContext context, bool darkMode) async {
     if (!isLogin && state == '') {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar( behavior: SnackBarBehavior.floating,
           backgroundColor: darkMode ? Colors.red.shade900 : Colors.red.shade200,
           content: const Text(
             'Choose a state!',
@@ -324,7 +324,7 @@ class _RegPageState extends State<RegPage> {
                     (route) => false);
           } catch (error) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              SnackBar( behavior: SnackBarBehavior.floating,
                 content: Text(
                   error.toString().split(']')[1],
                 ),
@@ -345,7 +345,8 @@ class _RegPageState extends State<RegPage> {
             push();
           } catch (error) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+
+              SnackBar( behavior: SnackBarBehavior.floating,
                 content: Text(
                   error.toString().split(']')[1],
                   style: const TextStyle(color: Colors.white),
@@ -358,7 +359,7 @@ class _RegPageState extends State<RegPage> {
         }
       } catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          SnackBar( behavior: SnackBarBehavior.floating,
             content: Text(
               error.toString().split(']')[1],
               style: const TextStyle(color: Colors.white),

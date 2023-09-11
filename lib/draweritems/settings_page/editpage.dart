@@ -104,7 +104,7 @@ class _EditPageState extends State<EditPage> {
       await FirebaseAuth.instance.currentUser!.reload();
       if (FirebaseAuth.instance.currentUser!.emailVerified) {
         await FirebaseFirestore.instance.collection('users').doc(
-            widget.user.docId).update({'userEmail': widget.controller.text.trim()});
+            widget.user.uid).update({'userEmail': widget.controller.text.trim()});
         print('################ VERIFIED #################');
         Navigator.pop(context);
         Navigator.pop(context);
@@ -136,7 +136,7 @@ class _EditPageState extends State<EditPage> {
             GestureDetector(
              onTap: ()async {
                if(widget.title=='Bio'){
-                 FirebaseFirestore.instance.collection('users').doc(widget.user.docId).update({'userBio':widget.controller.text});
+                 FirebaseFirestore.instance.collection('users').doc(widget.user.uid).update({'userBio':widget.controller.text});
                  Navigator.pop(context);
                }
                if(widget.title=='Email'){
@@ -206,7 +206,7 @@ class _EditPageState extends State<EditPage> {
   }
 
   void showSnackBar1(BuildContext context, bool darkMode, Object e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar( behavior: SnackBarBehavior.floating,
         backgroundColor: darkMode
             ? Colors.red.shade900
             : Colors.red.shade200,

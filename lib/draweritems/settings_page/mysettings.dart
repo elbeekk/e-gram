@@ -11,6 +11,7 @@ import 'package:elbekgram/var_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +27,7 @@ class MySettings extends StatefulWidget {
 class _MySettingsState extends State<MySettings> {
   late UserModel user;
   int currentIndex = 0;
+  XFile? image;
   TextEditingController bioCon = TextEditingController();
   TextEditingController emailCon = TextEditingController();
 
@@ -91,7 +93,9 @@ class _MySettingsState extends State<MySettings> {
                               ),
                             ),
                             PopupMenuItem(
-                              onTap: () {},
+                              onTap: () {
+                                chooseSource(context, darkMode);
+                              },
                               child: Row(
                                 children: [
                                   const Padding(
@@ -487,7 +491,7 @@ class _MySettingsState extends State<MySettings> {
                                     await Clipboard.setData(
                                         ClipboardData(text: user.userBio));
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
+                                        SnackBar( behavior: SnackBarBehavior.floating,
                                             duration: const Duration(seconds: 1),
                                             backgroundColor: darkMode
                                                 ? const Color(0xff47555E)
@@ -552,7 +556,7 @@ class _MySettingsState extends State<MySettings> {
                                   await Clipboard.setData(
                                       ClipboardData(text: user.userEmail));
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
+                                      SnackBar( behavior: SnackBarBehavior.floating,
                                           duration: const Duration(seconds: 1),
                                           backgroundColor: darkMode
                                               ? const Color(0xff47555E)
@@ -624,5 +628,81 @@ class _MySettingsState extends State<MySettings> {
         },
       ),
     );
+  }
+
+  Future<dynamic> chooseSource(BuildContext context, bool darkMode) {
+    return showDialog(
+                                barrierColor: null,
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10)
+                                    ),
+                                    backgroundColor: darkMode
+                                        ? const Color(0xff395781)
+                                        : Colors.grey.shade50,
+                                    shadowColor: Colors.black,
+                                    content: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Select source',
+                                          style: TextStyle(
+                                              color: darkMode
+                                                  ? Colors.white
+                                                  : Colors.black,
+                                              fontWeight: FontWeight.w400,fontSize: 18),
+                                        ),
+                                      ],
+                                    ),
+                                    actionsAlignment: MainAxisAlignment.center,
+                                    actions: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () async {
+                                                Navigator.pop(context);
+                                                image = await ImagePicker()
+                                                    .pickImage(
+                                                    source: ImageSource.camera,
+                                                    preferredCameraDevice:
+                                                    CameraDevice.front,
+                                                    imageQuality: 50);
+                                                setState(() {});
+                                              },
+                                              child: const Text(
+                                                'Camera',
+                                                style: TextStyle(
+                                                    color: Colors.blue,
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 20),
+                                              ),
+                                            ),
+                                            GestureDetector(
+                                              onTap: () async {
+                                                Navigator.pop(context);
+                                                image = await ImagePicker()
+                                                    .pickImage(
+                                                    source: ImageSource.gallery,
+                                                    imageQuality: 50);
+                                                setState(() {});
+                                              },
+                                              child: const Text(
+                                                'Gallery',
+                                                style: TextStyle(
+                                                    color: Colors.blue,
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 20),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ]),
+                              );
   }
 }
