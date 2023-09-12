@@ -37,7 +37,7 @@ class _CreateAccountState extends State<CreateAccount> {
   String link = '';
   uploadImage() async {
     final file = File(image!.path);
-    final ref = FirebaseStorage.instance.ref().child('users/${image!.name}');
+    final ref = FirebaseStorage.instance.ref().child('users/${FirebaseAuth.instance.currentUser!.uid}/${image!.name}');
     var uploadTask = ref.putFile(file);
     await uploadTask.whenComplete(() {
       try {

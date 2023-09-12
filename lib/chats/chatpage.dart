@@ -49,7 +49,7 @@ class _ChatPageState extends State<ChatPage> {
     final time = DateTime.now().millisecondsSinceEpoch.toString();
     final Message message = Message(
         toUid: user.uid,
-        msg: "$msg           ",
+        msg: "$msg              ",
         read: '',
         fromUid: FirebaseAuth.instance.currentUser!.uid,
         sent: time,
@@ -92,6 +92,7 @@ class _ChatPageState extends State<ChatPage> {
         },
         child: Scaffold(
           appBar: AppBar(
+              elevation: 0,
               automaticallyImplyLeading: false,
               backgroundColor:
                   darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
@@ -351,8 +352,6 @@ class _ChatPageState extends State<ChatPage> {
                     builder: (context, snapshot) {
                       return ListView.builder(
                           padding: const EdgeInsets.only(bottom: 5),
-                          // padding: EdgeInsets.only(
-                          //     bottom: showEmoji ? height*0.43 : (!isEdit ? height * 0.094: height * 0.13)),
                           reverse: true,
                           itemCount: snapshot.data!.docs.length,
                           itemBuilder: (context, index) {
@@ -435,7 +434,7 @@ class _ChatPageState extends State<ChatPage> {
                                                 setState(() {
                                                   isEdit = true;
                                                   editMes = message.msg;
-                                                  controller.text = message.msg.characters.skipLast(11).toString();
+                                                  controller.text = message.msg.characters.skipLast(14).toString();
                                                   editMesTime = message.sent;
                                                 });
                                               },
@@ -452,7 +451,7 @@ class _ChatPageState extends State<ChatPage> {
                                             onTap: () async {
                                               await Clipboard.setData(
                                                   ClipboardData(
-                                                      text: message.msg.characters.skipLast(11).toString()));
+                                                      text: message.msg.characters.skipLast(14).toString()));
                                               snackbarchik(
                                                   context,
                                                   darkMode,
@@ -471,100 +470,7 @@ class _ChatPageState extends State<ChatPage> {
                                             )),
                                       ]);
                                 },
-                                child: Row(
-                                  mainAxisAlignment: isMe
-                                      ? MainAxisAlignment.end
-                                      : MainAxisAlignment.start,
-                                  children: [
-                                    Stack(
-                                      children: [
-                                        Container(
-                                          constraints: BoxConstraints(
-                                            maxWidth: width * 0.8,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            gradient: isMe
-                                                ? LinearGradient(
-                                                    begin: Alignment.topCenter,
-                                                    end: Alignment.bottomCenter,
-                                                    colors: [
-                                                        darkMode
-                                                            ? const Color(
-                                                                0xff9400D3)
-                                                            : const Color(
-                                                                0xffAFD5F0),
-                                                        darkMode
-                                                            ? const Color(
-                                                                0xff7C00B8)
-                                                            : const Color(
-                                                                0xffAFD5F0),
-                                                        darkMode
-                                                            ? const Color(
-                                                                0xff64009D)
-                                                            : const Color(
-                                                                0xff9DCAEB),
-                                                        darkMode
-                                                            ? const Color(
-                                                                0xff4B0081)
-                                                            : const Color(
-                                                                0xff9DCAEB),
-                                                      ])
-                                                : null,
-                                            color: (isMe
-                                                ? darkMode
-                                                    ? const Color(0xff47555E)
-                                                    : const Color(0xff7AA5D2)
-                                                : darkMode
-                                                    ? Colors.blueGrey.shade900
-                                                    : Colors.grey.shade200),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: isMe
-                                                  ? const Radius.circular(20)
-                                                  : const Radius.circular(15),
-                                              topRight: !isMe
-                                                  ? const Radius.circular(20)
-                                                  : const Radius.circular(15),
-                                              bottomLeft: isMe
-                                                  ? const Radius.circular(20)
-                                                  : const Radius.circular(0),
-                                              bottomRight: !isMe
-                                                  ? const Radius.circular(20)
-                                                  : const Radius.circular(0),
-                                            ),
-                                          ),
-                                          padding: EdgeInsets.fromLTRB(
-                                              7, 7, isMe ? 7 : 14, 7),
-                                          child: Text(
-                                            message.msg,
-                                            style: const TextStyle(
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                        ),
-                                        Positioned(
-                                            right: isMe ? 3 : 7,
-                                            bottom: 1,
-                                            child: Text(
-                                              TimeOfDay.fromDateTime(
-                                                DateTime
-                                                    .fromMillisecondsSinceEpoch(
-                                                  int.parse(message.sent),
-                                                ),
-                                              ).format(context),
-                                              style: TextStyle(
-                                                  color: !isMe
-                                                      ? Colors.grey
-                                                      : darkMode
-                                                          ? Colors.white
-                                                              .withOpacity(.9)
-                                                          : Colors
-                                                              .blue.shade900,
-                                                  fontSize: 12),
-                                            ))
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                child: isMe ? myMessages(width, darkMode, message, context):friendMessages(width, darkMode, message, context),
                               ),
                             );
                           });
@@ -638,8 +544,9 @@ class _ChatPageState extends State<ChatPage> {
                             ],
                           ),
                         ),
-                        const SizedBox(
-                          height: 0.5,
+                         Container(
+                          height: .5,
+                           color: darkMode ? Colors.black : Colors.grey,
                         )
                       ],
                     ),
@@ -740,7 +647,7 @@ class _ChatPageState extends State<ChatPage> {
                                         .update(
                                       {
                                         'msg':
-                                           '${controller.text.trim().toString()}           ',
+                                           '${controller.text.trim().toString()}              ',
                                       },
                                     );
                                     setState(() {
@@ -863,6 +770,156 @@ class _ChatPageState extends State<ChatPage> {
         ),
       ),
     );
+  }
+
+  Row myMessages(double width, bool darkMode, Message message, BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Stack(
+                                    children: [
+                                      Container(
+                                        constraints: BoxConstraints(
+                                          maxWidth: width * 0.8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          gradient:LinearGradient(
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter,
+                                                  colors: [
+                                                      darkMode
+                                                          ? const Color(
+                                                              0xff9400D3)
+                                                          : const Color(
+                                                              0xffAFD5F0),
+                                                      darkMode
+                                                          ? const Color(
+                                                              0xff7C00B8)
+                                                          : const Color(
+                                                              0xffAFD5F0),
+                                                      darkMode
+                                                          ? const Color(
+                                                              0xff64009D)
+                                                          : const Color(
+                                                              0xff9DCAEB),
+                                                      darkMode
+                                                          ? const Color(
+                                                              0xff4B0081)
+                                                          : const Color(
+                                                              0xff9DCAEB),
+                                                    ]),
+                                          color: darkMode
+                                                  ? const Color(0xff47555E)
+                                                  : const Color(0xff7AA5D2),
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(20),
+                                            topRight:Radius.circular(15),
+                                            bottomLeft: Radius.circular(20),
+                                            bottomRight:Radius.circular(0),
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.fromLTRB(7,7,11,7),
+                                        child: Text(
+                                          message.msg,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                          right:3,
+                                          bottom: 1,
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                TimeOfDay.fromDateTime(
+                                                  DateTime
+                                                      .fromMillisecondsSinceEpoch(
+                                                    int.parse(message.sent),
+                                                  ),
+                                                ).format(context),
+                                                style: TextStyle(
+                                                    color: darkMode
+                                                            ? Colors.white
+                                                                .withOpacity(.9)
+                                                            : Colors
+                                                                .blue.shade900,
+                                                    fontSize: 12),
+                                              ),
+                                              if(message.read.isEmpty) Icon(Icons.check,size: 17,
+                                                color: darkMode
+                                                    ? Colors.white
+                                                    .withOpacity(.9)
+                                                    : Colors
+                                                    .blue.shade900,),
+                                              if(message.read.isNotEmpty) Icon(MaterialCommunityIcons.check_all,size: 17,
+                                                color: darkMode
+                                                    ? Colors.white
+                                                    .withOpacity(.9)
+                                                    : Colors
+                                                    .blue.shade900,)
+                                            ],
+                                          ))
+                                    ],
+                                  ),
+                                ],
+                              );
+  }
+  Row friendMessages(double width, bool darkMode, Message message, BuildContext context) {
+    if(message.read.isEmpty){
+      FirebaseFirestore.instance.collection('chats/${getConversationId(message.fromUid)}/messages/').doc(message.sent).update(
+          {'read': DateTime
+              .now()
+              .millisecondsSinceEpoch
+              .toString()});
+    }
+    return Row(
+                                mainAxisAlignment:MainAxisAlignment.start,
+                                children: [
+                                  Stack(
+                                    children: [
+                                      Container(
+                                        constraints: BoxConstraints(
+                                          maxWidth: width * 0.8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: (darkMode
+                                                  ? Colors.blueGrey.shade900
+                                                  : Colors.grey.shade200),
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft:Radius.circular(15),
+                                            topRight: Radius.circular(20),
+                                            bottomLeft:Radius.circular(0),
+                                            bottomRight:Radius.circular(20),
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.fromLTRB(
+                                            7, 7, 1, 7),
+                                        child: Text(
+                                          message.msg,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                          right: 7,
+                                          bottom: 1,
+                                          child: Text(
+                                            TimeOfDay.fromDateTime(
+                                              DateTime
+                                                  .fromMillisecondsSinceEpoch(
+                                                int.parse(message.sent),
+                                              ),
+                                            ).format(context),
+                                            style: const TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 12),
+                                          ))
+                                    ],
+                                  ),
+                                ],
+                              );
   }
 
   void snackbarchik(BuildContext context, bool darkMode, IconData icon,
