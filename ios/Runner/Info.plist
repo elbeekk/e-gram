@@ -2,15 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>The app tries to use your microphone</string>
-    <key>NSCameraUsageDescription</key>
-    <string>The app tries to use your camera</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
+
 	<string>Telegram App</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
@@ -44,6 +41,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>This app require access for usage for Camera Usage</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>The app tries to use your microphone</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app require access for usage for Photo Library Usage</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
