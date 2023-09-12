@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:provider/provider.dart';
-
 class ChatPage extends StatefulWidget {
   final String uid;
   UserModel userModel;
@@ -50,7 +49,7 @@ class _ChatPageState extends State<ChatPage> {
     final time = DateTime.now().millisecondsSinceEpoch.toString();
     final Message message = Message(
         toUid: user.uid,
-        msg: msg,
+        msg: "$msg           ",
         read: '',
         fromUid: FirebaseAuth.instance.currentUser!.uid,
         sent: time,
@@ -436,7 +435,7 @@ class _ChatPageState extends State<ChatPage> {
                                                 setState(() {
                                                   isEdit = true;
                                                   editMes = message.msg;
-                                                  controller.text = message.msg;
+                                                  controller.text = message.msg.characters.skipLast(11).toString();
                                                   editMesTime = message.sent;
                                                 });
                                               },
@@ -453,7 +452,7 @@ class _ChatPageState extends State<ChatPage> {
                                             onTap: () async {
                                               await Clipboard.setData(
                                                   ClipboardData(
-                                                      text: message.msg));
+                                                      text: message.msg.characters.skipLast(11).toString()));
                                               snackbarchik(
                                                   context,
                                                   darkMode,
@@ -477,65 +476,92 @@ class _ChatPageState extends State<ChatPage> {
                                       ? MainAxisAlignment.end
                                       : MainAxisAlignment.start,
                                   children: [
-                                    Container(
-                                      constraints: BoxConstraints(
-                                        maxWidth: width * 0.8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        gradient: isMe
-                                            ? LinearGradient(
-                                                begin: Alignment.topCenter,
-                                                end: Alignment.bottomCenter,
-                                                colors: [
-                                                    darkMode
-                                                        ? const Color(
-                                                            0xff9400D3)
-                                                        : const Color(
-                                                            0xffAFD5F0),
-                                                    darkMode
-                                                        ? const Color(
-                                                            0xff7C00B8)
-                                                        : const Color(
-                                                            0xffAFD5F0),
-                                                    darkMode
-                                                        ? const Color(
-                                                            0xff64009D)
-                                                        : const Color(
-                                                            0xff9DCAEB),
-                                                    darkMode
-                                                        ? const Color(
-                                                            0xff4B0081)
-                                                        : const Color(
-                                                            0xff9DCAEB),
-                                                  ])
-                                            : null,
-                                        color: (isMe
-                                            ? darkMode
-                                                ? const Color(0xff47555E)
-                                                : const Color(0xff7AA5D2)
-                                            : darkMode
-                                                ? Colors.blueGrey.shade900
-                                                : Colors.grey.shade200),
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: isMe
-                                              ? const Radius.circular(20)
-                                              : const Radius.circular(15),
-                                          topRight: !isMe
-                                              ? const Radius.circular(20)
-                                              : const Radius.circular(15),
-                                          bottomLeft: isMe
-                                              ? const Radius.circular(20)
-                                              : const Radius.circular(0),
-                                          bottomRight: !isMe
-                                              ? const Radius.circular(20)
-                                              : const Radius.circular(0),
+                                    Stack(
+                                      children: [
+                                        Container(
+                                          constraints: BoxConstraints(
+                                            maxWidth: width * 0.8,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            gradient: isMe
+                                                ? LinearGradient(
+                                                    begin: Alignment.topCenter,
+                                                    end: Alignment.bottomCenter,
+                                                    colors: [
+                                                        darkMode
+                                                            ? const Color(
+                                                                0xff9400D3)
+                                                            : const Color(
+                                                                0xffAFD5F0),
+                                                        darkMode
+                                                            ? const Color(
+                                                                0xff7C00B8)
+                                                            : const Color(
+                                                                0xffAFD5F0),
+                                                        darkMode
+                                                            ? const Color(
+                                                                0xff64009D)
+                                                            : const Color(
+                                                                0xff9DCAEB),
+                                                        darkMode
+                                                            ? const Color(
+                                                                0xff4B0081)
+                                                            : const Color(
+                                                                0xff9DCAEB),
+                                                      ])
+                                                : null,
+                                            color: (isMe
+                                                ? darkMode
+                                                    ? const Color(0xff47555E)
+                                                    : const Color(0xff7AA5D2)
+                                                : darkMode
+                                                    ? Colors.blueGrey.shade900
+                                                    : Colors.grey.shade200),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: isMe
+                                                  ? const Radius.circular(20)
+                                                  : const Radius.circular(15),
+                                              topRight: !isMe
+                                                  ? const Radius.circular(20)
+                                                  : const Radius.circular(15),
+                                              bottomLeft: isMe
+                                                  ? const Radius.circular(20)
+                                                  : const Radius.circular(0),
+                                              bottomRight: !isMe
+                                                  ? const Radius.circular(20)
+                                                  : const Radius.circular(0),
+                                            ),
+                                          ),
+                                          padding: EdgeInsets.fromLTRB(
+                                              7, 7, isMe ? 7 : 14, 7),
+                                          child: Text(
+                                            message.msg,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                      padding: const EdgeInsets.all(10),
-                                      child: Text(
-                                        message.msg,
-                                        style: const TextStyle(fontSize: 17),
-                                      ),
+                                        Positioned(
+                                            right: isMe ? 3 : 7,
+                                            bottom: 1,
+                                            child: Text(
+                                              TimeOfDay.fromDateTime(
+                                                DateTime
+                                                    .fromMillisecondsSinceEpoch(
+                                                  int.parse(message.sent),
+                                                ),
+                                              ).format(context),
+                                              style: TextStyle(
+                                                  color: !isMe
+                                                      ? Colors.grey
+                                                      : darkMode
+                                                          ? Colors.white
+                                                              .withOpacity(.9)
+                                                          : Colors
+                                                              .blue.shade900,
+                                                  fontSize: 12),
+                                            ))
+                                      ],
                                     ),
                                   ],
                                 ),
@@ -714,7 +740,7 @@ class _ChatPageState extends State<ChatPage> {
                                         .update(
                                       {
                                         'msg':
-                                            controller.text.trim().toString(),
+                                           '${controller.text.trim().toString()}           ',
                                       },
                                     );
                                     setState(() {
@@ -738,6 +764,17 @@ class _ChatPageState extends State<ChatPage> {
                                     });
                                   }
                                 } else {
+                                  updateDataFirestore(
+                                    'users',
+                                    FirebaseAuth.instance.currentUser!.uid,
+                                    {
+                                      'chattingWith': FieldValue.arrayUnion(
+                                        [
+                                          widget.uid.toString(),
+                                        ],
+                                      ),
+                                    },
+                                  );
                                   sendMessage(
                                       widget.userModel, controller.text.trim());
                                   setState(() {
@@ -771,7 +808,7 @@ class _ChatPageState extends State<ChatPage> {
                       child: EmojiPicker(
                         onEmojiSelected: (category, emoji) {
                           setState(() {
-                            isSend=true;
+                            isSend = true;
                           });
                         },
                         onBackspacePressed: () {
@@ -787,15 +824,18 @@ class _ChatPageState extends State<ChatPage> {
                           // Issue: https://github.com/flutter/flutter/issues/28894
                           verticalSpacing: 0,
                           horizontalSpacing: 0,
+                          replaceEmojiOnLimitExceed: true,
                           gridPadding: EdgeInsets.zero,
                           initCategory: Category.RECENT,
                           bgColor: darkMode
                               ? const Color(0xff303841)
                               : const Color(0xffEEEEEE),
-                          indicatorColor: const Color(0xff7AA5D2),
+                          indicatorColor: darkMode
+                              ? const Color(0xff303841)
+                              : const Color(0xffEEEEEE),
                           iconColor: Colors.grey,
-                          iconColorSelected: Colors.blue,
-                          backspaceColor: Colors.blue,
+                          iconColorSelected: const Color(0xff7AA5D2),
+                          backspaceColor: const Color(0xff7AA5D2),
                           skinToneDialogBgColor: Colors.white,
                           skinToneIndicatorColor: Colors.grey,
                           enableSkinTones: true,
@@ -803,8 +843,8 @@ class _ChatPageState extends State<ChatPage> {
                           recentsLimit: 48,
                           noRecents: const Text(
                             'No Recents',
-                            style: TextStyle(
-                                fontSize: 20, color: Colors.black26),
+                            style:
+                                TextStyle(fontSize: 20, color: Colors.black26),
                             textAlign: TextAlign.center,
                           ),
                           // Needs to be const Widget
@@ -863,7 +903,6 @@ class _ChatPageState extends State<ChatPage> {
     } else {
       groupChatId = "$peerId-$currentUserId";
     }
-    updateDataFirestore('users', currentUserId, {'chattingWith': peerId});
   }
 
   sendChat({required String message}) async {

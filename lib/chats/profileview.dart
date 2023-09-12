@@ -25,6 +25,7 @@ class _MyProfileState extends State<MyProfile> {
   bool isMuted = true;
   bool isStreched = false;
   int currentIndex = 0;
+
   @override
   Widget build(BuildContext context) {
     var currentPlatform = Theme.of(context).platform;
@@ -33,14 +34,14 @@ class _MyProfileState extends State<MyProfile> {
     double width = MediaQuery.sizeOf(context).width;
     return Scaffold(
         backgroundColor:
-        darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
+            darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
         body: CustomScrollView(
           slivers: [
             SliverAppBar(
               elevation: 0,
               pinned: true,
               backgroundColor:
-              darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
+                  darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
               actions: [
                 InkWell(
                   borderRadius: BorderRadius.circular(15),
@@ -65,13 +66,13 @@ class _MyProfileState extends State<MyProfile> {
                 },
                 child: currentPlatform == TargetPlatform.android
                     ? Icon(
-                  Icons.arrow_back,
-                  color: darkMode ? Colors.white : Colors.white,
-                )
+                        Icons.arrow_back,
+                        color: darkMode ? Colors.white : Colors.white,
+                      )
                     : Icon(
-                  Icons.arrow_back_ios,
-                  color: darkMode ? Colors.white : Colors.white,
-                ),
+                        Icons.arrow_back_ios,
+                        color: darkMode ? Colors.white : Colors.white,
+                      ),
               ),
               expandedHeight: height * 0.15,
               stretch: true,
@@ -90,13 +91,13 @@ class _MyProfileState extends State<MyProfile> {
                         radius: height * 0.026,
                         backgroundImage: NetworkImage(
                             widget.userModel.userImages[
-                            widget.userModel.userImages.length - 1]),
+                                widget.userModel.userImages.length - 1]),
                       ),
                       openBuilder: (context, action) {
                         return StatefulBuilder(builder: (context, setState1) {
                           return Container(
                             decoration:
-                            const BoxDecoration(color: Colors.black),
+                                const BoxDecoration(color: Colors.black),
                             height: height,
                             width: width,
                             child: SafeArea(
@@ -111,22 +112,22 @@ class _MyProfileState extends State<MyProfile> {
                                         ),
                                         child: Row(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             GestureDetector(
                                               onTap: () {
                                                 Navigator.pop(context);
                                               },
                                               child: currentPlatform ==
-                                                  TargetPlatform.android
+                                                      TargetPlatform.android
                                                   ? const Icon(
-                                                Icons.arrow_back,
-                                                color: Colors.white,
-                                              )
+                                                      Icons.arrow_back,
+                                                      color: Colors.white,
+                                                    )
                                                   : const Icon(
-                                                Icons.arrow_back_ios,
-                                                color: Colors.white,
-                                              ),
+                                                      Icons.arrow_back_ios,
+                                                      color: Colors.white,
+                                                    ),
                                             ),
                                             PopupMenuButton(
                                               icon: const Icon(
@@ -135,45 +136,45 @@ class _MyProfileState extends State<MyProfile> {
                                               ),
                                               surfaceTintColor: Colors.white,
                                               shape:
-                                              const RoundedRectangleBorder(
-                                                  borderRadius:
-                                                  BorderRadius.all(
-                                                      Radius.circular(
-                                                          10))),
+                                                  const RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  10))),
                                               color: const Color(0xff303841),
                                               itemBuilder: (context) {
                                                 var list =
-                                                <PopupMenuEntry<Object>>[
+                                                    <PopupMenuEntry<Object>>[
                                                   PopupMenuItem(
                                                     onTap: () async {
                                                       final urlImage = widget
-                                                          .userModel
-                                                          .userImages[
-                                                      currentIndex];
+                                                              .userModel
+                                                              .userImages[
+                                                          currentIndex];
                                                       final url =
-                                                      Uri.parse(urlImage);
+                                                          Uri.parse(urlImage);
                                                       final response =
-                                                      await http.get(url);
+                                                          await http.get(url);
                                                       final bytes =
                                                           response.bodyBytes;
                                                       final temp =
-                                                      await getTemporaryDirectory();
+                                                          await getTemporaryDirectory();
                                                       final path =
                                                           "${temp.path}/image.jpg";
                                                       File(path)
                                                           .writeAsBytesSync(
-                                                          bytes);
+                                                              bytes);
                                                       await Share.shareFiles(
                                                           [path],
                                                           text:
-                                                          'Profile photo of ${widget.userModel.userFName} ${widget.userModel.userLName} in Elbekgram');
+                                                              'Profile photo of ${widget.userModel.userFName} ${widget.userModel.userLName} in Elbekgram');
                                                     },
                                                     child: const Row(
                                                       children: [
                                                         Padding(
                                                           padding:
-                                                          EdgeInsets.only(
-                                                              right: 15),
+                                                              EdgeInsets.only(
+                                                                  right: 15),
                                                           child: Icon(
                                                             MaterialCommunityIcons
                                                                 .share_variant_outline,
@@ -184,7 +185,7 @@ class _MyProfileState extends State<MyProfile> {
                                                           'Share',
                                                           style: TextStyle(
                                                               color:
-                                                              Colors.white),
+                                                                  Colors.white),
                                                         ),
                                                       ],
                                                     ),
@@ -194,14 +195,14 @@ class _MyProfileState extends State<MyProfile> {
                                                       final urlImage = widget
                                                           .userModel
                                                           .userImages[widget
-                                                          .userModel
-                                                          .userImages
-                                                          .length -
+                                                              .userModel
+                                                              .userImages
+                                                              .length -
                                                           1 -
                                                           currentIndex];
                                                       try {
                                                         final tempDir =
-                                                        await getTemporaryDirectory();
+                                                            await getTemporaryDirectory();
                                                         final path =
                                                             "${tempDir.path}/${widget.userModel.uid}$currentIndex.jpg";
                                                         await Dio().download(
@@ -210,7 +211,7 @@ class _MyProfileState extends State<MyProfile> {
                                                             .saveImage(
                                                           path,
                                                           albumName:
-                                                          'Elbekgram',
+                                                              'Elbekgram',
                                                         );
                                                       } catch (e) {
                                                         print('Error1');
@@ -220,8 +221,8 @@ class _MyProfileState extends State<MyProfile> {
                                                       children: [
                                                         Padding(
                                                           padding:
-                                                          EdgeInsets.only(
-                                                              right: 15),
+                                                              EdgeInsets.only(
+                                                                  right: 15),
                                                           child: Icon(
                                                             MaterialCommunityIcons
                                                                 .progress_download,
@@ -232,7 +233,7 @@ class _MyProfileState extends State<MyProfile> {
                                                           'Save to Gallery',
                                                           style: TextStyle(
                                                               color:
-                                                              Colors.white),
+                                                                  Colors.white),
                                                         ),
                                                       ],
                                                     ),
@@ -254,7 +255,7 @@ class _MyProfileState extends State<MyProfile> {
                                       ),
                                       Row(
                                         mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                            MainAxisAlignment.center,
                                         children: [
                                           Text(
                                             (currentIndex + 1).toString(),
@@ -291,7 +292,7 @@ class _MyProfileState extends State<MyProfile> {
                                               pageSnapping: true,
                                               onPageChanged: (value) {
                                                 setState1(
-                                                      () {
+                                                  () {
                                                     currentIndex = value;
                                                   },
                                                 );
@@ -300,18 +301,18 @@ class _MyProfileState extends State<MyProfile> {
                                                   .userModel.userImages.length,
                                               itemBuilder: (context, index) =>
                                                   Container(
-                                                    decoration: BoxDecoration(
-                                                        image: DecorationImage(
-                                                            image: NetworkImage(widget
-                                                                .userModel
-                                                                .userImages[widget
+                                                decoration: BoxDecoration(
+                                                    image: DecorationImage(
+                                                        image: NetworkImage(widget
+                                                            .userModel
+                                                            .userImages[widget
                                                                 .userModel
                                                                 .userImages
                                                                 .length -
-                                                                1 -
-                                                                index]),
-                                                            fit: BoxFit.cover)),
-                                                  ),
+                                                            1 -
+                                                            index]),
+                                                        fit: BoxFit.cover)),
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -374,7 +375,7 @@ class _MyProfileState extends State<MyProfile> {
                       children: [
                         const Row(),
                         Padding(
-                          padding:  EdgeInsets.only(left: width * 0.05),
+                          padding: EdgeInsets.only(left: width * 0.05),
                           child: const Text(
                             'Info',
                             style: TextStyle(
@@ -386,11 +387,10 @@ class _MyProfileState extends State<MyProfile> {
                         if (widget.userModel.userBio != '')
                           InkWell(
                             onLongPress: () async {
-                              if(widget.userModel.userBio!='') {
-                                await Clipboard.setData(
-                                    ClipboardData(text: widget.userModel.userBio));
+                              if (widget.userModel.userBio != '') {
+                                await Clipboard.setData(ClipboardData(
+                                    text: widget.userModel.userBio));
                                 ScaffoldMessenger.of(context).showSnackBar(
-
                                     SnackBar(
                                         behavior: SnackBarBehavior.floating,
                                         duration: const Duration(seconds: 1),
@@ -413,7 +413,8 @@ class _MyProfileState extends State<MyProfile> {
                               }
                             },
                             child: Padding(
-                              padding: EdgeInsets.only(left: width * 0.05,bottom: 5),
+                              padding: EdgeInsets.only(
+                                  left: width * 0.05, bottom: 5),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -438,31 +439,30 @@ class _MyProfileState extends State<MyProfile> {
                           ),
                         InkWell(
                           onLongPress: () async {
-                            await Clipboard.setData(
-                                ClipboardData(text: widget.userModel.userEmail));
-                            ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    behavior: SnackBarBehavior.floating,
-                                    duration: const Duration(seconds: 1),
-                                    backgroundColor: darkMode
-                                        ? const Color(0xff47555E)
-                                        : const Color(0xff7AA5D2),
-                                    content: const Row(
-                                      children: [
-                                        Icon(
-                                          Icons.copy,
-                                          color: Colors.white,
-                                        ),
-                                        Text(
-                                          '  Email copied to clipboard',
-                                          style: TextStyle(
-                                              color: Colors.white),
-                                        )
-                                      ],
-                                    )));
+                            await Clipboard.setData(ClipboardData(
+                                text: widget.userModel.userEmail));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                duration: const Duration(seconds: 1),
+                                backgroundColor: darkMode
+                                    ? const Color(0xff47555E)
+                                    : const Color(0xff7AA5D2),
+                                content: const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.copy,
+                                      color: Colors.white,
+                                    ),
+                                    Text(
+                                      '  Email copied to clipboard',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  ],
+                                )));
                           },
                           child: Padding(
-                            padding:  EdgeInsets.only(left: width * 0.05,top: 5,bottom: 5),
+                            padding: EdgeInsets.only(
+                                left: width * 0.05, top: 5, bottom: 5),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -470,7 +470,9 @@ class _MyProfileState extends State<MyProfile> {
                                 Text(
                                   widget.userModel.userEmail,
                                   style: TextStyle(
-                                      color: darkMode ? Colors.white : Colors.black,
+                                      color: darkMode
+                                          ? Colors.white
+                                          : Colors.black,
                                       fontSize: 16),
                                 ),
                                 const SizedBox(
@@ -484,6 +486,56 @@ class _MyProfileState extends State<MyProfile> {
                             ),
                           ),
                         ),
+                        InkWell(
+                          onLongPress: () async {
+                            await Clipboard.setData(ClipboardData(
+                                text:
+                                    "${widget.userModel.country.characters.skip(5)}, ${widget.userModel.state}, ${widget.userModel.city}"));
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                behavior: SnackBarBehavior.floating,
+                                duration: const Duration(seconds: 1),
+                                backgroundColor: darkMode
+                                    ? const Color(0xff47555E)
+                                    : const Color(0xff7AA5D2),
+                                content: const Row(
+                                  children: [
+                                    Icon(
+                                      Icons.copy,
+                                      color: Colors.white,
+                                    ),
+                                    Text(
+                                      '  Location copied to clipboard',
+                                      style: TextStyle(color: Colors.white),
+                                    )
+                                  ],
+                                )));
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                                left: width * 0.05, top: 5, bottom: 5),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Row(),
+                                Text(
+                                  "${widget.userModel.country.characters.skip(5)}, ${widget.userModel.state}, ${widget.userModel.city}",
+                                  style: TextStyle(
+                                      color: darkMode
+                                          ? Colors.white
+                                          : Colors.black,
+                                      fontSize: 16),
+                                ),
+                                const SizedBox(
+                                  height: 7,
+                                ),
+                                const Text(
+                                  'Location',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                         Divider(
                           color: darkMode ? Colors.black : Colors.grey,
                           thickness: 0.2,
@@ -491,7 +543,11 @@ class _MyProfileState extends State<MyProfile> {
                         InkWell(
                           onTap: () {},
                           child: Padding(
-                            padding: EdgeInsets.only(right: width * 0.07,left: width * 0.05, top: 5,bottom: 6),
+                            padding: EdgeInsets.only(
+                                right: width * 0.07,
+                                left: width * 0.05,
+                                top: 5,
+                                bottom: 6),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -511,7 +567,8 @@ class _MyProfileState extends State<MyProfile> {
                                     ),
                                     Text(
                                       isMuted ? 'Off' : 'On',
-                                      style: const TextStyle(color: Colors.grey),
+                                      style:
+                                          const TextStyle(color: Colors.grey),
                                     ),
                                   ],
                                 ),
@@ -527,8 +584,9 @@ class _MyProfileState extends State<MyProfile> {
                                   child: Row(
                                     children: [
                                       VerticalDivider(
-                                        color:
-                                        darkMode ? Colors.black : Colors.grey,
+                                        color: darkMode
+                                            ? Colors.black
+                                            : Colors.grey,
                                         thickness: .2,
                                         indent: 5,
                                         width: 2,

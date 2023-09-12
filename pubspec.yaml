@@ -56,6 +56,7 @@ dependencies:
   share_plus: ^7.1.0
   image_cropper: ^4.0.1
   emoji_picker_flutter: ^1.6.1
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:

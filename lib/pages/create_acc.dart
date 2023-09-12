@@ -59,6 +59,7 @@ class _CreateAccountState extends State<CreateAccount> {
     var uid = FirebaseAuth.instance.currentUser!.uid;
     var users = FirebaseFirestore.instance.collection('users').doc(uid.toString());
     users.set({
+      'chattingWith':[uid.toString()],
       'country': widget.country,
       'state': widget.state,
       'city': widget.city,
