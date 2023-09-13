@@ -1,7 +1,6 @@
 import 'dart:async';
-
 import 'package:csc_picker/csc_picker.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:elbekgram/api/api.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,12 +23,11 @@ class _RegPageState extends State<RegPage> {
   String state = '';
   String city = '';
   bool isLogin = false;
-
+  final focus = FocusNode();
   void push() async {
     timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-      await FirebaseAuth.instance.currentUser!.reload();
-      if (FirebaseAuth.instance.currentUser!.emailVerified) {
-        print('################ VERIFIED #################');
+      API.reload();
+      if (API.verifiedResult()) {
         Navigator.pop(context);
         Navigator.push(
             context,
@@ -196,10 +194,12 @@ class _RegPageState extends State<RegPage> {
                   padding: const EdgeInsets.fromLTRB(30, 15, 30, 10),
                   child: SizedBox(
                     height: 55,
-                    child: TextFormField(
+                    child: TextField(
                       controller: emailAddress,
                       keyboardType: TextInputType.emailAddress,
                       cursorColor: Colors.blue,
+                      textInputAction: TextInputAction.next,
+                      onSubmitted: (_) => FocusScope.of(context).requestFocus(focus),
                       decoration: InputDecoration(
                         labelText: 'Email address',
                         hintText: 'example@gmail.com',
@@ -217,9 +217,12 @@ class _RegPageState extends State<RegPage> {
                   padding: const EdgeInsets.fromLTRB(30, 0, 30, 15),
                   child: SizedBox(
                     height: 55,
-                    child: TextFormField(
+                    child: TextField(
+                      focusNode: focus,
+                      textInputAction: TextInputAction.done,
                       controller: password,
                       obscureText: true,
+                      onSubmitted: (_) => FocusScope.of(context).unfocus(),
                       keyboardType: TextInputType.visiblePassword,
                       cursorColor: Colors.blue,
                       decoration: InputDecoration(
@@ -272,8 +275,7 @@ class _RegPageState extends State<RegPage> {
                   TextButton(
                     onPressed: () async {
                       try {
-                        await FirebaseAuth.instance.sendPasswordResetEmail(
-                            email: emailAddress.text);
+                        API.passwordReset(emailAddress.text);
                         showCupertinoModalPopup1(context,
                             "We have sent a confirmation link to your email, please check your email.",
                             true);
@@ -313,9 +315,7 @@ class _RegPageState extends State<RegPage> {
       try {
         if (isLogin) {
           try {
-            await FirebaseAuth.instance.signInWithEmailAndPassword(
-                email: emailAddress.text.trim(),
-                password: password.text.trim());
+            API.signIn(emailAddress.text.trim(), password.text.trim());
             Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
@@ -335,10 +335,8 @@ class _RegPageState extends State<RegPage> {
           }
         } else {
           try {
-            await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                email: emailAddress.text.trim(),
-                password: password.text.trim());
-            await FirebaseAuth.instance.currentUser?.sendEmailVerification();
+            API.createUser(emailAddress.text.trim(), password.text.trim());
+            API.verifyCurrentUser();
             showCupertinoModalPopup1(context,
                 "We have sent a confirmation link to your email, please check your email.",
                 false);
@@ -412,8 +410,9 @@ class _RegPageState extends State<RegPage> {
                       GestureDetector(
                         onTap: () async {
                           Navigator.pop(context);
-                          if (!isReset) {await FirebaseAuth.instance.currentUser!
-                              .delete();}
+                          if (!isReset) {
+                            API.deleteUser();
+                          }
                         },
                         child: Container(
                           height: 30,

@@ -1,9 +1,8 @@
 import 'dart:async';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:elbekgram/api/api.dart';
 import 'package:elbekgram/chats/chatpage.dart';
+import 'package:elbekgram/messagemodel.dart';
 import 'package:elbekgram/usermodel.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +19,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   late Timer timer;
+  Message? message;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            FirebaseAuth.instance.signOut();
+            API.singOut;
           },
           elevation: 0,
           backgroundColor:
@@ -64,9 +64,8 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         body: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('users').snapshots(),
-          builder: (context,
-              AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+          stream: API.getAllUsers(),
+          builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(
                 child: CircularProgressIndicator(),
@@ -122,21 +121,40 @@ class _HomePageState extends State<HomePage> {
                       ),
                     );
                   },
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          user.userImages[user.userImages.length - 1]),
-                      radius: 25,
-                      backgroundColor: Colors.white,
-                    ),
-                    title: Text("${user.userFName} ${user.userLName}"),
-                    subtitle: Text(user.userEmail),
-                  ),
+                  child: mesORemail(user, darkMode),
                 );
               },
             );
           },
         ));
+  }
+
+
+
+  Widget mesORemail(UserModel user, bool darkMode) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 10),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 10,
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundImage:
+                NetworkImage(user.userImages[user.userImages.length - 1]),
+                radius: 25,
+                backgroundColor: Colors.white,
+              ),
+              title: Text("${user.userFName} ${user.userLName}"),
+              subtitle: Text(
+                user.userEmail,
+                maxLines: 1,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -145,7 +163,6 @@ class Customshape extends CustomClipper<Path> {
   Path getClip(Size size) {
     double height = size.height;
     double width = size.width;
-
     var path = Path();
     path.lineTo(0, height);
     path.lineTo(width, height);
