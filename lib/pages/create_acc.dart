@@ -1,6 +1,5 @@
 import 'dart:io';
-import 'package:elbekgram/api/api.dart';
-import 'package:elbekgram/usermodel.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:elbekgram/chats/homepage.dart';
 import 'package:elbekgram/var_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreateAccount extends StatefulWidget {
@@ -20,56 +20,61 @@ class CreateAccount extends StatefulWidget {
       {super.key,
       required this.city,
       required this.country,
-      required this.state,
-      required this.email});
+      required this.state, required this.email});
 
   @override
   State<CreateAccount> createState() => _CreateAccountState();
 }
-
 class _CreateAccountState extends State<CreateAccount> {
   final TextEditingController firstName = TextEditingController();
   final TextEditingController lastName = TextEditingController();
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
+
   XFile? image;
-  final focus = FocusNode();
+
+
+
   String link = '';
   uploadImage() async {
     final file = File(image!.path);
-    final ref = FirebaseStorage.instance
-        .ref()
-        .child('users/${API.currentUser()?.uid}/${image!.name}');
+    final ref = FirebaseStorage.instance.ref().child('users/${FirebaseAuth.instance.currentUser!.uid}/${image!.name}');
     var uploadTask = ref.putFile(file);
     await uploadTask.whenComplete(() {
       try {
-        setState(() async {
-          link = await ref.getDownloadURL();
-        });
+       setState(() async {
+         link = await ref.getDownloadURL();
+       });
       } catch (onError) {
+        print("Error (could not get URL)");
         setState(() {
-          link =
-              'https://t4.ftcdn.net/jpg/00/65/77/27/240_F_65772719_A1UV5kLi5nCEWI0BNLLiFaBPEkUbv5Fv.jpg';
+          link = 'https://t4.ftcdn.net/jpg/00/65/77/27/240_F_65772719_A1UV5kLi5nCEWI0BNLLiFaBPEkUbv5Fv.jpg';
         });
       }
     });
   }
 
+
+
   createAc() async {
-    API.getCurrentUserData().set(UserModel(
-            city: widget.city,
-            country: widget.country,
-            createdAt: DateTime.now().toString(),
-            state: widget.state,
-            uid: API.currentUser()?.uid ?? 'No User',
-            userBio: '',
-            userEmail: widget.email,
-            userImages: [
-              if (link.toString() == '')
-                'https://t4.ftcdn.net/jpg/00/65/77/27/240_F_65772719_A1UV5kLi5nCEWI0BNLLiFaBPEkUbv5Fv.jpg',
-              if (link.toString() != '') link.toString(),
-            ],
-            userFName: firstName.text,
-            userLName: lastName.text)
-        .toJson());
+    var uid = FirebaseAuth.instance.currentUser!.uid;
+    var users = FirebaseFirestore.instance.collection('users').doc(uid.toString());
+    users.set({
+      'chattingWith':[uid.toString()],
+      'country': widget.country,
+      'state': widget.state,
+      'city': widget.city,
+      'uid': uid,
+      'userBio': '',
+      'userEmail':widget.email,
+      'userFirstName': firstName.text,
+      'userLastName': lastName.text,
+      'createdAt': DateTime.now().toString(),
+      'userImages': [
+       if(link.toString()=='')'https://t4.ftcdn.net/jpg/00/65/77/27/240_F_65772719_A1UV5kLi5nCEWI0BNLLiFaBPEkUbv5Fv.jpg',
+       if(link.toString()!='')link.toString(),
+
+      ],
+    });
   }
 
   @override
@@ -82,17 +87,17 @@ class _CreateAccountState extends State<CreateAccount> {
       },
       child: Scaffold(
         backgroundColor:
-            darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
+        darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
         body: SafeArea(
           child: Scaffold(
             extendBodyBehindAppBar: true,
             backgroundColor:
-                darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
+            darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
             appBar: AppBar(
               leading: TargetPlatform.android == currentPlatform
                   ? GestureDetector(
-                      onTap: () {
-                        API.deleteUser();
+                      onTap: () async {
+                        await FirebaseAuth.instance.currentUser!.delete();
                         Navigator.pop(context);
                       },
                       child: Icon(
@@ -101,8 +106,8 @@ class _CreateAccountState extends State<CreateAccount> {
                       ),
                     )
                   : GestureDetector(
-                      onTap: () {
-                        API.deleteUser();
+                      onTap: () async{
+                        await FirebaseAuth.instance.currentUser!.delete();
                         Navigator.pop(context);
                       },
                       child: Icon(
@@ -117,8 +122,7 @@ class _CreateAccountState extends State<CreateAccount> {
                 onPressed: () {
                   if (firstName.text.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        behavior: SnackBarBehavior.floating,
+                      SnackBar( behavior: SnackBarBehavior.floating,
                         content: const Text(
                           'First name is required',
                           style: TextStyle(color: Colors.white),
@@ -136,7 +140,8 @@ class _CreateAccountState extends State<CreateAccount> {
                         builder: (context) {
                           return AlertDialog(
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
+                              borderRadius: BorderRadius.circular(10)
+                            ),
                             backgroundColor: darkMode
                                 ? const Color(0xff395781)
                                 : Colors.grey.shade50,
@@ -175,7 +180,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                   Navigator.pushAndRemoveUntil(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => const HomePage(),
+                                        builder: (context) =>  const HomePage(),
                                       ),
                                       (route) => false);
                                 },
@@ -194,10 +199,8 @@ class _CreateAccountState extends State<CreateAccount> {
                         },
                       );
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                        behavior: SnackBarBehavior.floating,
-                        content: const Text(
-                            'Please pick an image for profile photo'),
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar( behavior: SnackBarBehavior.floating,
+                        content: const Text('Please pick an image for profile photo'),
                         backgroundColor: darkMode
                             ? Colors.red.shade900
                             : Colors.red.shade200,
@@ -205,23 +208,14 @@ class _CreateAccountState extends State<CreateAccount> {
                     }
                   }
                 },
-                backgroundColor: darkMode
-                    ? const Color(0xff47555E)
-                    : const Color(0xff7AA5D2),
+                backgroundColor:
+                darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
                 elevation: 0,
                 child: TargetPlatform.android == currentPlatform
-                    ? const Icon(
-                        Icons.arrow_forward,
-                        color: Colors.white,
-                      )
-                    : const Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.white,
-                      )),
+                    ? const Icon(Icons.arrow_forward,color: Colors.white,)
+                    : const Icon(Icons.arrow_forward_ios,color: Colors.white,)),
             body: SingleChildScrollView(
-              padding: EdgeInsets.only(
-                  top: MediaQuery.sizeOf(context).height * 0.1,
-                  bottom: MediaQuery.sizeOf(context).height * 0.05),
+              padding: EdgeInsets.only(top: MediaQuery.sizeOf(context).height*0.1,bottom: MediaQuery.sizeOf(context).height*0.05),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -235,7 +229,8 @@ class _CreateAccountState extends State<CreateAccount> {
                             context: context,
                             builder: (context) => AlertDialog(
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10)),
+                                    borderRadius: BorderRadius.circular(10)
+                                ),
                                 backgroundColor: darkMode
                                     ? const Color(0xff395781)
                                     : Colors.grey.shade50,
@@ -249,8 +244,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                           color: darkMode
                                               ? Colors.white
                                               : Colors.black,
-                                          fontWeight: FontWeight.w400,
-                                          fontSize: 18),
+                                          fontWeight: FontWeight.w400,fontSize: 18),
                                     ),
                                   ],
                                 ),
@@ -308,9 +302,8 @@ class _CreateAccountState extends State<CreateAccount> {
                         },
                         child: CircleAvatar(
                             radius: 40,
-                            backgroundColor: darkMode
-                                ? const Color(0xff47555E)
-                                : const Color(0xff7AA5D2),
+                            backgroundColor:
+                            darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
                             backgroundImage: image != null
                                 ? FileImage(File(image!.path))
                                 : null,
@@ -349,11 +342,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 10),
                         child: TextField(
-                          onSubmitted: (value) =>
-                              FocusScope.of(context).requestFocus(focus),
-                          keyboardAppearance:
-                              darkMode ? Brightness.dark : Brightness.light,
-                          textInputAction: TextInputAction.next,
+                          keyboardAppearance: darkMode ? Brightness.dark:Brightness.light,
                           controller: firstName,
                           keyboardType: TextInputType.name,
                           decoration: InputDecoration(
@@ -373,10 +362,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 10),
                         child: TextField(
-                          textInputAction: TextInputAction.done,
-                          focusNode: focus,
-                          keyboardAppearance:
-                              darkMode ? Brightness.dark : Brightness.light,
+                          keyboardAppearance: darkMode ? Brightness.dark:Brightness.light,
                           controller: lastName,
                           keyboardType: TextInputType.name,
                           decoration: InputDecoration(
@@ -396,7 +382,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   ),
                   const Text(''),
                   SizedBox(
-                    height: MediaQuery.sizeOf(context).height * 0.29,
+                    height: MediaQuery.sizeOf(context).height*0.29,
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -429,9 +415,8 @@ class _CreateAccountState extends State<CreateAccount> {
                                               builder: (context) {
                                                 return AlertDialog(
                                                   shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10)),
+                                                      borderRadius: BorderRadius.circular(10)
+                                                  ),
                                                   backgroundColor: darkMode
                                                       ? const Color(0xff395781)
                                                       : Colors.grey.shade50,
