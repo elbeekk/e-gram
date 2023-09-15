@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 class Message {
   final String toUid;
   final String msg;
@@ -23,7 +22,7 @@ class Message {
     "fromUid": fromUid,
     "sent": sent,
   };
-  factory Message.fromJson(QueryDocumentSnapshot<Map<String, dynamic>> json) => Message(
+  factory Message.fromJson(json) => Message(
     toUid: json["toUid"].toString(),
     msg: json["msg"].toString(),
     read: json["read"].toString(),
