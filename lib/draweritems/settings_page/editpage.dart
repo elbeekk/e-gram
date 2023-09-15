@@ -1,7 +1,9 @@
 import 'dart:async';
-import 'package:elbekgram/api/api.dart';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elbekgram/usermodel.dart';
 import 'package:elbekgram/var_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -99,11 +101,14 @@ class _EditPageState extends State<EditPage> {
 
   void push() async {
     timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
-      API.reload();
-      if (API.verifiedResult()) {
-        API.updateInDoc('users', widget.user.uid, {'userEmail': widget.controller.text.trim()});
+      await FirebaseAuth.instance.currentUser!.reload();
+      if (FirebaseAuth.instance.currentUser!.emailVerified) {
+        await FirebaseFirestore.instance.collection('users').doc(
+            widget.user.uid).update({'userEmail': widget.controller.text.trim()});
+        print('################ VERIFIED #################');
         Navigator.pop(context);
         Navigator.pop(context);
+
         timer.cancel();
       }
     });
@@ -131,16 +136,16 @@ class _EditPageState extends State<EditPage> {
             GestureDetector(
              onTap: ()async {
                if(widget.title=='Bio'){
-                 API.updateInDoc('users', widget.user.uid, {'userBio':widget.controller.text});
+                 FirebaseFirestore.instance.collection('users').doc(widget.user.uid).update({'userBio':widget.controller.text});
                  Navigator.pop(context);
                }
                if(widget.title=='Email'){
-                 tempEmail= API.currentUser()?.email;
+                 tempEmail= FirebaseAuth.instance.currentUser!.email;
                    try{
-                     if(API.currentUser()?.email!=widget.controller.text.trim()){
-                       API.currentUser()?.updateEmail(
+                     if(FirebaseAuth.instance.currentUser!.email!=widget.controller.text.trim()){
+                       await FirebaseAuth.instance.currentUser!.updateEmail(
                            widget.controller.text.trim());
-                       API.verifyCurrentUser();
+                       await FirebaseAuth.instance.currentUser!.sendEmailVerification();
                        showCupertinoModalPopup1(context, 'We have sent a confirmation link to your new email, please check your email.');
                        push();
 

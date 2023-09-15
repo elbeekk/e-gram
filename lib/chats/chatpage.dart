@@ -1,11 +1,12 @@
 import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:elbekgram/api/api.dart';
 import 'package:elbekgram/chats/profileview.dart';
 import 'package:elbekgram/messagemodel.dart';
 import 'package:elbekgram/usermodel.dart';
 import 'package:elbekgram/var_provider.dart';
+import 'package:elbekgram/widgets/messagemodel.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
@@ -31,11 +32,39 @@ class _ChatPageState extends State<ChatPage> {
   bool showEmoji = false;
   TextEditingController controller = TextEditingController();
 
+  static String getConversationId(String id) =>
+      FirebaseAuth.instance.currentUser!.uid.hashCode <= id.hashCode
+          ? "${FirebaseAuth.instance.currentUser!.uid}_$id"
+          : "${id}_${FirebaseAuth.instance.currentUser!.uid}";
 
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
+      UserModel user1) {
+    return FirebaseFirestore.instance
+        .collection('chats/${getConversationId(user1.uid)}/messages/')
+        .orderBy('sent', descending: true)
+        .snapshots();
+  }
 
+  static Future<void> sendMessage(UserModel user, String msg) async {
+    final time = DateTime.now().millisecondsSinceEpoch.toString();
+    final Message message = Message(
+        toUid: user.uid,
+        msg: "$msg              ",
+        read: '',
+        fromUid: FirebaseAuth.instance.currentUser!.uid,
+        sent: time,
+        type: Type.text);
+    final ref = FirebaseFirestore.instance
+        .collection('chats/${getConversationId(user.uid)}/messages/')
+        .doc(time.toString());
+    await ref.set(message.toJson());
+  }
 
-
-
+  @override
+  void initState() {
+    generateGroupId();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -235,7 +264,7 @@ class _ChatPageState extends State<ChatPage> {
                                         onTap: () async {
                                           await FirebaseFirestore.instance
                                               .collection('chats')
-                                              .doc(API.getConversationId(
+                                              .doc(getConversationId(
                                                   widget.userModel.uid))
                                               .collection('messages')
                                               .get()
@@ -319,7 +348,7 @@ class _ChatPageState extends State<ChatPage> {
                         fit: BoxFit.cover),
                   ),
                   child: StreamBuilder(
-                    stream: API.getAllMessages(widget.userModel),
+                    stream: getAllMessages(widget.userModel),
                     builder: (context, snapshot) {
                       return ListView.builder(
                           padding: const EdgeInsets.only(bottom: 5),
@@ -329,7 +358,7 @@ class _ChatPageState extends State<ChatPage> {
                             final message =
                                 Message.fromJson(snapshot.data!.docs[index]);
                             final isMe = message.fromUid ==
-                                   API.currentUser()?.uid
+                                    FirebaseAuth.instance.currentUser!.uid
                                 ? true
                                 : false;
                             return Padding(
@@ -373,15 +402,20 @@ class _ChatPageState extends State<ChatPage> {
                                       items: [
                                         PopupMenuItem(
                                             onTap: () async {
-                                              API.getMessageData(widget.userModel.uid, message.sent).delete()
+                                              await FirebaseFirestore.instance
+                                                  .collection('chats')
+                                                  .doc(getConversationId(
+                                                      widget.userModel.uid))
+                                                  .collection('messages')
+                                                  .doc(message.sent)
+                                                  .delete()
                                                   .whenComplete(() =>
-                                                  snackbarchik(
-                                                      context,
-                                                      darkMode,
-                                                      Icons.delete_outline,
-                                                      'Successfully deleted',
-                                                      true));
-
+                                                      snackbarchik(
+                                                          context,
+                                                          darkMode,
+                                                          Icons.delete_outline,
+                                                          'Successfully deleted',
+                                                          true));
                                             },
                                             child: const Row(
                                               children: [
@@ -436,7 +470,7 @@ class _ChatPageState extends State<ChatPage> {
                                             )),
                                       ]);
                                 },
-                                child: isMe ? API.myMessages(width, darkMode, message, context):API.friendMessages(width, darkMode, message, context),
+                                child: isMe ? myMessages(width, darkMode, message, context):friendMessages(width, darkMode, message, context),
                               ),
                             );
                           });
@@ -479,7 +513,7 @@ class _ChatPageState extends State<ChatPage> {
                                   const SizedBox(
                                     height: 2,
                                   ),
-                                  SizedBox(
+                                  Container(
                                     width: width * 0.73,
                                     child: Text(
                                       editMes,
@@ -557,15 +591,13 @@ class _ChatPageState extends State<ChatPage> {
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: 4),
                               child: TextField(
-
                                 onTap: () {
-                                  if (showEmoji) {
+                                  if (showEmoji)
                                     setState(() => showEmoji = !showEmoji);
-                                  }
                                 },
                                 textInputAction: TextInputAction.newline,
                                 onChanged: (value) {
-                                  if (value.trim().isNotEmpty) {
+                                  if (value.trim().length != 0) {
                                     setState(() {
                                       isSend = true;
                                     });
@@ -606,10 +638,18 @@ class _ChatPageState extends State<ChatPage> {
                               if (controller.text.trim().isNotEmpty) {
                                 if (isEdit) {
                                   if (controller.text != editMes) {
-                                    API.getMessageData(widget.userModel.uid, editMesTime).update({
-                                      'msg':
-                                      '${controller.text.trim().toString()}              ',
-                                    },);
+                                    await FirebaseFirestore.instance
+                                        .collection('chats')
+                                        .doc(getConversationId(
+                                            widget.userModel.uid))
+                                        .collection('messages')
+                                        .doc(editMesTime)
+                                        .update(
+                                      {
+                                        'msg':
+                                           '${controller.text.trim().toString()}              ',
+                                      },
+                                    );
                                     setState(() {
                                       isEdit = false;
                                       controller.clear();
@@ -631,14 +671,18 @@ class _ChatPageState extends State<ChatPage> {
                                     });
                                   }
                                 } else {
-                                  API.updateInDoc('users', API.currentUser()?.uid ?? '',  {
-                                    'chattingWith': FieldValue.arrayUnion(
-                                      [
-                                        widget.uid.toString(),
-                                      ],
-                                    ),
-                                  },);
-                                  API.sendMessage(
+                                  updateDataFirestore(
+                                    'users',
+                                    FirebaseAuth.instance.currentUser!.uid,
+                                    {
+                                      'chattingWith': FieldValue.arrayUnion(
+                                        [
+                                          widget.uid.toString(),
+                                        ],
+                                      ),
+                                    },
+                                  );
+                                  sendMessage(
                                       widget.userModel, controller.text.trim());
                                   setState(() {
                                     controller.text = '';
@@ -728,6 +772,155 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  Row myMessages(double width, bool darkMode, Message message, BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Stack(
+                                    children: [
+                                      Container(
+                                        constraints: BoxConstraints(
+                                          maxWidth: width * 0.8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          gradient:LinearGradient(
+                                                  begin: Alignment.topCenter,
+                                                  end: Alignment.bottomCenter,
+                                                  colors: [
+                                                      darkMode
+                                                          ? const Color(
+                                                              0xff9400D3)
+                                                          : const Color(
+                                                              0xffAFD5F0),
+                                                      darkMode
+                                                          ? const Color(
+                                                              0xff7C00B8)
+                                                          : const Color(
+                                                              0xffAFD5F0),
+                                                      darkMode
+                                                          ? const Color(
+                                                              0xff64009D)
+                                                          : const Color(
+                                                              0xff9DCAEB),
+                                                      darkMode
+                                                          ? const Color(
+                                                              0xff4B0081)
+                                                          : const Color(
+                                                              0xff9DCAEB),
+                                                    ]),
+                                          color: darkMode
+                                                  ? const Color(0xff47555E)
+                                                  : const Color(0xff7AA5D2),
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(20),
+                                            topRight:Radius.circular(15),
+                                            bottomLeft: Radius.circular(20),
+                                            bottomRight:Radius.circular(0),
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.fromLTRB(7,7,11,7),
+                                        child: Text(
+                                          message.msg,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                          right:3,
+                                          bottom: 1,
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                TimeOfDay.fromDateTime(
+                                                  DateTime
+                                                      .fromMillisecondsSinceEpoch(
+                                                    int.parse(message.sent),
+                                                  ),
+                                                ).format(context),
+                                                style: TextStyle(
+                                                    color: darkMode
+                                                            ? Colors.white
+                                                                .withOpacity(.9)
+                                                            : Colors
+                                                                .blue.shade900,
+                                                    fontSize: 12),
+                                              ),
+                                              if(message.read.isEmpty) Icon(Icons.check,size: 17,
+                                                color: darkMode
+                                                    ? Colors.white
+                                                    .withOpacity(.9)
+                                                    : Colors
+                                                    .blue.shade900,),
+                                              if(message.read.isNotEmpty) Icon(MaterialCommunityIcons.check_all,size: 17,
+                                                color: darkMode
+                                                    ? Colors.white
+                                                    .withOpacity(.9)
+                                                    : Colors
+                                                    .blue.shade900,)
+                                            ],
+                                          ))
+                                    ],
+                                  ),
+                                ],
+                              );
+  }
+  Row friendMessages(double width, bool darkMode, Message message, BuildContext context) {
+    if(message.read.isEmpty){
+      FirebaseFirestore.instance.collection('chats/${getConversationId(message.fromUid)}/messages/').doc(message.sent).update(
+          {'read': DateTime
+              .now()
+              .millisecondsSinceEpoch
+              .toString()});
+    }
+    return Row(
+                                mainAxisAlignment:MainAxisAlignment.start,
+                                children: [
+                                  Stack(
+                                    children: [
+                                      Container(
+                                        constraints: BoxConstraints(
+                                          maxWidth: width * 0.8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: (darkMode
+                                                  ? Colors.blueGrey.shade900
+                                                  : Colors.grey.shade200),
+                                          borderRadius: const BorderRadius.only(
+                                            topLeft:Radius.circular(15),
+                                            topRight: Radius.circular(20),
+                                            bottomLeft:Radius.circular(0),
+                                            bottomRight:Radius.circular(20),
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.fromLTRB(
+                                            7, 7, 1, 7),
+                                        child: Text(
+                                          message.msg,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                          right: 7,
+                                          bottom: 1,
+                                          child: Text(
+                                            TimeOfDay.fromDateTime(
+                                              DateTime
+                                                  .fromMillisecondsSinceEpoch(
+                                                int.parse(message.sent),
+                                              ),
+                                            ).format(context),
+                                            style: const TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 12),
+                                          ))
+                                    ],
+                                  ),
+                                ],
+                              );
+  }
 
   void snackbarchik(BuildContext context, bool darkMode, IconData icon,
       String text, bool isDel) {
@@ -759,4 +952,37 @@ class _ChatPageState extends State<ChatPage> {
         )));
   }
 
+  void generateGroupId() {
+    currentUserId = FirebaseAuth.instance.currentUser!.uid;
+    peerId = widget.uid;
+    if (currentUserId.compareTo(peerId) > 0) {
+      groupChatId = "$currentUserId-$peerId";
+    } else {
+      groupChatId = "$peerId-$currentUserId";
+    }
+  }
+
+  sendChat({required String message}) async {
+    MessageChat chat = MessageChat(
+        idFrom: currentUserId,
+        idTo: peerId,
+        timestamp: Timestamp.now().toString(),
+        content: message);
+    await FirebaseFirestore.instance
+        .collection('groupMessages')
+        .doc(groupChatId)
+        .collection('messages')
+        .add(chat.tojson());
+  }
+
+  Future<void> updateDataFirestore(
+    String collectionPath,
+    String docPath,
+    Map<String, dynamic> dataNeedUpdate,
+  ) {
+    return FirebaseFirestore.instance
+        .collection(collectionPath)
+        .doc(docPath)
+        .update(dataNeedUpdate);
+  }
 }
