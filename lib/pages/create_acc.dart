@@ -67,8 +67,10 @@ class _CreateAccountState extends State<CreateAccount> {
       'userBio': '',
       'userEmail':widget.email,
       'userFirstName': firstName.text,
+      'isOnline':true,
+      'lastActive':DateTime.now().millisecondsSinceEpoch.toString(),
       'userLastName': lastName.text,
-      'createdAt': DateTime.now().toString(),
+      'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
       'userImages': [
        if(link.toString()=='')'https://t4.ftcdn.net/jpg/00/65/77/27/240_F_65772719_A1UV5kLi5nCEWI0BNLLiFaBPEkUbv5Fv.jpg',
        if(link.toString()!='')link.toString(),

@@ -1,12 +1,15 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:elbekgram/api/api.dart';
 import 'package:elbekgram/chats/chatpage.dart';
 import 'package:elbekgram/chats/profileview.dart';
 import 'package:elbekgram/usermodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:elbekgram/chats/menu_drawer.dart';
@@ -27,6 +30,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    API.updateActiveStatus(true);
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      print('MEssage: $message');
+      debugPrint('MEssage: $message');
+
+      if(message.toString().contains('pause')) API.updateActiveStatus(false);
+      if(message.toString().contains('resume')) API.updateActiveStatus(true);
+
+      return Future.value(message);
+    });
     initDynamicLinks();
     super.initState();
   }
@@ -160,12 +173,8 @@ class _HomePageState extends State<HomePage> {
     StreamBuilder(
       stream: FirebaseFirestore.instance.collection('users').snapshots(),
       builder: (BuildContext context,AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-        print('IIIIIIIIIIIIIII1');
-        debugPrint('IIIIIIIIIIIIIII1');
         for(var i in snapshot.data!.docs){
           i['uid']==uid;
-          print('IIIIIIIIIIIIIII ${i.toString()}');
-          debugPrint('IIIIIIIIIIIIIII ${i.toString()}');
           setState(() {
             userModel = UserModel.fromJson(i);
           });
@@ -175,7 +184,7 @@ class _HomePageState extends State<HomePage> {
     );
     return userModel ?? UserModel(city: "city", country: 'country', createdAt: 'createdAt', state: 'state',
         uid: 'uid', userBio: 'userBio', userEmail: 'userEmail', userImages: [], userFName: 'userFName',
-        userLName: 'userLName');
+        userLName: 'userLName',lastActive: '',isOnline: false);
   }
 
   Future<void> initDynamicLinks() async {

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:elbekgram/api/my_data_util.dart';
 import 'package:elbekgram/usermodel.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -93,7 +94,7 @@ class _MyProfileState extends State<MyProfile> {
                       color: darkMode ? Colors.white : Colors.white,
                     ),
                   ),
-                  expandedHeight: height * 0.15,
+                  expandedHeight: height * 0.17,
                   stretch: true,
                   flexibleSpace: FlexibleSpaceBar(
                     titlePadding: EdgeInsets.only(
@@ -337,26 +338,26 @@ class _MyProfileState extends State<MyProfile> {
                           },
                         ),
                         const SizedBox(
-                          width: 5,
+                          width: 8,
                         ),
                         SizedBox(
-                          height: height * 0.055,
+                          height: height * 0.05,
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
                                   width: width * 0.4,
                                   child: Text(
                                     "${user.userFName} ${user.userLName}",
-                                    style: const TextStyle(fontSize: 15),
+                                    style: const TextStyle(fontSize: 13),
                                     overflow: TextOverflow.ellipsis,
                                   )),
                               SizedBox(
                                   width: width * 0.4,
                                   child: Text(
-                                    user.userEmail,
-                                    style: const TextStyle(fontSize: 12),
+                                    user.isOnline ? 'Online': MyDataUtil().getLastActive(context: context, lastActive: user.lastActive),
+                                    style: const TextStyle(fontSize: 10,fontWeight: FontWeight.normal),
                                     overflow: TextOverflow.ellipsis,
                                   )),
                             ],
@@ -546,6 +547,56 @@ class _MyProfileState extends State<MyProfile> {
                                 ),
                               ),
                             ),
+                            InkWell(
+                              onLongPress: () async {
+                                await Clipboard.setData(ClipboardData(
+                                    text:
+                                    "${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).day} ${MyDataUtil.getMonth(DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)))} ${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).year}"));
+                                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    duration: const Duration(seconds: 1),
+                                    backgroundColor: darkMode
+                                        ? const Color(0xff47555E)
+                                        : const Color(0xff7AA5D2),
+                                    content: const Row(
+                                      children: [
+                                        Icon(
+                                          Icons.copy,
+                                          color: Colors.white,
+                                        ),
+                                        Text(
+                                          '  Joined Time copied to clipboard',
+                                          style: TextStyle(color: Colors.white),
+                                        )
+                                      ],
+                                    )));
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                    left: width * 0.05, top: 5, bottom: 5),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Row(),
+                                    Text(
+                                      "${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).day} ${MyDataUtil.getMonth(DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)))} ${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).year}",
+                                      style: TextStyle(
+                                          color: darkMode
+                                              ? Colors.white
+                                              : Colors.black,
+                                          fontSize: 16),
+                                    ),
+                                    const SizedBox(
+                                      height: 7,
+                                    ),
+                                    const Text(
+                                      'Joined On',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                             Divider(
                               color: darkMode ? Colors.black : Colors.grey,
                               thickness: 0.2,
@@ -554,7 +605,6 @@ class _MyProfileState extends State<MyProfile> {
                               onTap: () {},
                               child: Padding(
                                 padding: EdgeInsets.only(
-                                    right: width * 0.07,
                                     left: width * 0.05,
                                     top: 5,
                                     bottom: 6),
@@ -605,16 +655,27 @@ class _MyProfileState extends State<MyProfile> {
                                           const SizedBox(
                                             width: 10,
                                           ),
-                                          Switch.adaptive(
-                                            activeColor: darkMode
-                                                ? const Color(0xff47555E)
-                                                : const Color(0xff7AA5D2),
-                                            value: !isMuted,
-                                            onChanged: (value) {
+                                          InkWell(
+                                            onTap: () {
                                               setState(() {
                                                 isMuted = !isMuted;
                                               });
+
                                             },
+                                            child: Container(
+                                              padding: EdgeInsets.all(height*0.02),
+                                              child: Switch.adaptive(
+                                                activeColor: darkMode
+                                                    ? const Color(0xff47555E)
+                                                    : const Color(0xff7AA5D2),
+                                                value: !isMuted,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    isMuted = !isMuted;
+                                                  });
+                                                },
+                                              ),
+                                            ),
                                           ),
                                         ],
                                       ),

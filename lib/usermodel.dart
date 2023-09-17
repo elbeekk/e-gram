@@ -11,6 +11,8 @@ class UserModel {
   final List userImages;
   final String userFName;
   final String userLName;
+  final String lastActive;
+  final bool isOnline;
 
   UserModel({
     required this.city,
@@ -23,6 +25,8 @@ class UserModel {
     required this.userImages,
     required this.userFName,
     required this.userLName,
+    required this.isOnline,
+    required this.lastActive
   });
 
   Map<String, dynamic> toJson() {
@@ -37,6 +41,8 @@ class UserModel {
       "userImages": userImages,
       "userFirstName": userFName,
       "userLastName": userLName,
+      'isOnline':isOnline,
+      'lastActive':lastActive,
     };
   }
 
@@ -46,6 +52,8 @@ class UserModel {
         country: map['country'],
         createdAt: map['createdAt'],
         state: map['state'],
+        isOnline: map['isOnline'],
+        lastActive: map['lastActive'],
         uid: map['uid'],
         userBio: map['userBio'],
         userEmail: map['userEmail'],

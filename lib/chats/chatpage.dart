@@ -1,5 +1,6 @@
 import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:elbekgram/api/my_data_util.dart';
 import 'package:elbekgram/chats/profileview.dart';
 import 'package:elbekgram/messagemodel.dart';
 import 'package:elbekgram/usermodel.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:provider/provider.dart';
+
 class ChatPage extends StatefulWidget {
   final String uid;
   UserModel userModel;
@@ -104,20 +106,30 @@ class _ChatPageState extends State<ChatPage> {
                   closedElevation: 0,
                   transitionDuration: const Duration(milliseconds: 500),
                   transitionType: ContainerTransitionType.fade,
-                  closedBuilder: (context, action) => SizedBox(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            InkWell(
-                                borderRadius: BorderRadius.circular(15),
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                                child: SizedBox(
-                                  height: width * .1,
-                                  width: width * .08,
-                                  child:
-                                      currentPlatform == TargetPlatform.android
+                  closedBuilder: (context, action) => StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('users')
+                            .where('uid', isEqualTo: widget.uid)
+                            .limit(1)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          final data = snapshot.data?.docs;
+                          final list = data?.map((e) => UserModel.fromJson(e)).toList()??[];
+
+                          return SizedBox(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                InkWell(
+                                    borderRadius: BorderRadius.circular(15),
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: SizedBox(
+                                      height: width * .1,
+                                      width: width * .08,
+                                      child: currentPlatform ==
+                                              TargetPlatform.android
                                           ? Icon(
                                               Icons.arrow_back,
                                               color: darkMode
@@ -130,207 +142,215 @@ class _ChatPageState extends State<ChatPage> {
                                                   ? Colors.white
                                                   : Colors.white,
                                             ),
-                                )),
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: height * .025,
-                                  backgroundImage: NetworkImage(widget
-                                          .userModel.userImages[
-                                      widget.userModel.userImages.length - 1]),
-                                ),
-                                const SizedBox(
-                                  width: 15,
-                                ),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                    )),
+                                Row(
                                   children: [
-                                    SizedBox(
-                                      width: width * 0.45,
-                                      child: Text(
-                                        "${widget.userModel.userFName} ${widget.userModel.userLName}",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 17),
-                                      ),
+                                    CircleAvatar(
+                                      radius: height * .025,
+                                      backgroundImage: NetworkImage(widget
+                                              .userModel.userImages[
+                                          widget.userModel.userImages.length -
+                                              1]),
                                     ),
                                     const SizedBox(
-                                      height: 4,
+                                      width: 15,
                                     ),
-                                    SizedBox(
-                                      width: width * 0.45,
-                                      child: Text(
-                                        widget.userModel.userEmail,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
-                                            fontSize: 13, color: Colors.white),
-                                        maxLines: 1,
-                                      ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(
+                                          width: width * 0.45,
+                                          child: Text(
+                                            "${widget.userModel.userFName} ${widget.userModel.userLName}",
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 17),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 4,
+                                        ),
+                                        SizedBox(
+                                          width: width * 0.45,
+                                          child: Text(
+                                            list.isNotEmpty ? list[0].isOnline ? 'Online':
+                                            MyDataUtil().getLastActive(context: context, lastActive: list[0].lastActive) :
+                                            MyDataUtil().getLastActive(context: context, lastActive: widget.userModel.lastActive),
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                                fontSize: 13,
+                                                color: Colors.white),
+                                            maxLines: 1,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                InkWell(
-                                  borderRadius: BorderRadius.circular(15),
-                                  onTap: () {},
-                                  child: SizedBox(
-                                      width: width * .1,
-                                      height: width * 0.1,
-                                      child: const Icon(
-                                        Icons.call,
-                                        color: Colors.white,
-                                      )),
-                                ),
-                                PopupMenuButton(
-                                  shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(10))),
-                                  color: darkMode
-                                      ? const Color(0xff303841)
-                                      : const Color(0xffEEEEEE),
-                                  itemBuilder: (context) {
-                                    var list = <PopupMenuEntry<Object>>[
-                                      const PopupMenuItem(
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 15),
-                                              child: Icon(
-                                                Ionicons
-                                                    .ios_volume_mute_outline,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            Text(
-                                              'Mute',
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const PopupMenuItem(
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 15),
-                                              child: Icon(
-                                                Ionicons.videocam_outline,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            Text('Video Call'),
-                                          ],
-                                        ),
-                                      ),
-                                      const PopupMenuItem(
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 15),
-                                              child: Icon(
-                                                Ionicons.search_outline,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            Text('Search'),
-                                          ],
-                                        ),
-                                      ),
-                                      const PopupMenuItem(
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 15),
-                                              child: Icon(
-                                                MaterialCommunityIcons
-                                                    .brush_variant,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            Text('Set Wallpaper'),
-                                          ],
-                                        ),
-                                      ),
-                                      PopupMenuItem(
-                                        onTap: () async {
-                                          await FirebaseFirestore.instance
-                                              .collection('chats')
-                                              .doc(getConversationId(
-                                                  widget.userModel.uid))
-                                              .collection('messages')
-                                              .get()
-                                              .then(
-                                            (value) {
-                                              for (var i in value.docs) {
-                                                i.reference.delete();
-                                              }
-                                            },
-                                          );
-                                        },
-                                        child: const Row(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 15),
-                                              child: Icon(
-                                                MaterialCommunityIcons.broom,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            Text('Clear History'),
-                                          ],
-                                        ),
-                                      ),
-                                      const PopupMenuItem(
-                                        child: Row(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 20),
-                                              child: Icon(
-                                                MaterialCommunityIcons
-                                                    .delete_outline,
-                                                color: Colors.grey,
-                                              ),
-                                            ),
-                                            Text('Delete chat'),
-                                          ],
-                                        ),
-                                      ),
-                                    ];
-                                    list.insert(
-                                        1,
-                                        const PopupMenuDivider(
-                                          height: 5,
-                                        ));
-                                    return list;
-                                  },
-                                  child: Transform.rotate(
-                                    angle: 3.14 / 1,
-                                    child: SizedBox(
-                                      width: height * .047,
-                                      height: height * .047,
-                                      child: const Center(
-                                          child: Icon(
-                                        Icons.menu,
-                                        color: Colors.white,
-                                      )),
+                                Row(
+                                  children: [
+                                    InkWell(
+                                      borderRadius: BorderRadius.circular(15),
+                                      onTap: () {},
+                                      child: SizedBox(
+                                          width: width * .1,
+                                          height: width * 0.1,
+                                          child: const Icon(
+                                            Icons.call,
+                                            color: Colors.white,
+                                          )),
                                     ),
-                                  ),
+                                    PopupMenuButton(
+                                      shape: const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(10))),
+                                      color: darkMode
+                                          ? const Color(0xff303841)
+                                          : const Color(0xffEEEEEE),
+                                      itemBuilder: (context) {
+                                        var list = <PopupMenuEntry<Object>>[
+                                          const PopupMenuItem(
+                                            child: Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 15),
+                                                  child: Icon(
+                                                    Ionicons
+                                                        .ios_volume_mute_outline,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  'Mute',
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const PopupMenuItem(
+                                            child: Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 15),
+                                                  child: Icon(
+                                                    Ionicons.videocam_outline,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                Text('Video Call'),
+                                              ],
+                                            ),
+                                          ),
+                                          const PopupMenuItem(
+                                            child: Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 15),
+                                                  child: Icon(
+                                                    Ionicons.search_outline,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                Text('Search'),
+                                              ],
+                                            ),
+                                          ),
+                                          const PopupMenuItem(
+                                            child: Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 15),
+                                                  child: Icon(
+                                                    MaterialCommunityIcons
+                                                        .brush_variant,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                Text('Set Wallpaper'),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem(
+                                            onTap: () async {
+                                              await FirebaseFirestore.instance
+                                                  .collection('chats')
+                                                  .doc(getConversationId(
+                                                      widget.userModel.uid))
+                                                  .collection('messages')
+                                                  .get()
+                                                  .then(
+                                                (value) {
+                                                  for (var i in value.docs) {
+                                                    i.reference.delete();
+                                                  }
+                                                },
+                                              );
+                                            },
+                                            child: const Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 15),
+                                                  child: Icon(
+                                                    MaterialCommunityIcons
+                                                        .broom,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                Text('Clear History'),
+                                              ],
+                                            ),
+                                          ),
+                                          const PopupMenuItem(
+                                            child: Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(
+                                                      right: 20),
+                                                  child: Icon(
+                                                    MaterialCommunityIcons
+                                                        .delete_outline,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                                Text('Delete chat'),
+                                              ],
+                                            ),
+                                          ),
+                                        ];
+                                        list.insert(
+                                            1,
+                                            const PopupMenuDivider(
+                                              height: 5,
+                                            ));
+                                        return list;
+                                      },
+                                      child: Transform.rotate(
+                                        angle: 3.14 / 1,
+                                        child: SizedBox(
+                                          width: height * .047,
+                                          height: height * .047,
+                                          child: const Center(
+                                              child: Icon(
+                                            Icons.menu,
+                                            color: Colors.white,
+                                          )),
+                                        ),
+                                      ),
+                                    )
+                                  ],
                                 )
                               ],
-                            )
-                          ],
-                        ),
+                            ),
+                          );
+                        },
                       ),
                   openBuilder: (context, action) =>
                       MyProfile(uid: widget.userModel.uid))),
@@ -434,7 +454,10 @@ class _ChatPageState extends State<ChatPage> {
                                                 setState(() {
                                                   isEdit = true;
                                                   editMes = message.msg;
-                                                  controller.text = message.msg.characters.skipLast(14).toString();
+                                                  controller.text = message
+                                                      .msg.characters
+                                                      .skipLast(14)
+                                                      .toString();
                                                   editMesTime = message.sent;
                                                 });
                                               },
@@ -451,7 +474,10 @@ class _ChatPageState extends State<ChatPage> {
                                             onTap: () async {
                                               await Clipboard.setData(
                                                   ClipboardData(
-                                                      text: message.msg.characters.skipLast(14).toString()));
+                                                      text: message
+                                                          .msg.characters
+                                                          .skipLast(14)
+                                                          .toString()));
                                               snackbarchik(
                                                   context,
                                                   darkMode,
@@ -470,7 +496,11 @@ class _ChatPageState extends State<ChatPage> {
                                             )),
                                       ]);
                                 },
-                                child: isMe ? myMessages(width, darkMode, message, context):friendMessages(width, darkMode, message, context),
+                                child: isMe
+                                    ? myMessages(
+                                        width, darkMode, message, context)
+                                    : friendMessages(
+                                        width, darkMode, message, context),
                               ),
                             );
                           });
@@ -544,9 +574,9 @@ class _ChatPageState extends State<ChatPage> {
                             ],
                           ),
                         ),
-                         Container(
+                        Container(
                           height: .5,
-                           color: darkMode ? Colors.black : Colors.grey,
+                          color: darkMode ? Colors.black : Colors.grey,
                         )
                       ],
                     ),
@@ -647,7 +677,7 @@ class _ChatPageState extends State<ChatPage> {
                                         .update(
                                       {
                                         'msg':
-                                           '${controller.text.trim().toString()}              ',
+                                            '${controller.text.trim().toString()}              ',
                                       },
                                     );
                                     setState(() {
@@ -772,154 +802,145 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Row myMessages(double width, bool darkMode, Message message, BuildContext context) {
+  Row myMessages(
+      double width, bool darkMode, Message message, BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Stack(
-                                    children: [
-                                      Container(
-                                        constraints: BoxConstraints(
-                                          maxWidth: width * 0.8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          gradient:LinearGradient(
-                                                  begin: Alignment.topCenter,
-                                                  end: Alignment.bottomCenter,
-                                                  colors: [
-                                                      darkMode
-                                                          ? const Color(
-                                                              0xff9400D3)
-                                                          : const Color(
-                                                              0xffAFD5F0),
-                                                      darkMode
-                                                          ? const Color(
-                                                              0xff7C00B8)
-                                                          : const Color(
-                                                              0xffAFD5F0),
-                                                      darkMode
-                                                          ? const Color(
-                                                              0xff64009D)
-                                                          : const Color(
-                                                              0xff9DCAEB),
-                                                      darkMode
-                                                          ? const Color(
-                                                              0xff4B0081)
-                                                          : const Color(
-                                                              0xff9DCAEB),
-                                                    ]),
-                                          color: darkMode
-                                                  ? const Color(0xff47555E)
-                                                  : const Color(0xff7AA5D2),
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(20),
-                                            topRight:Radius.circular(15),
-                                            bottomLeft: Radius.circular(20),
-                                            bottomRight:Radius.circular(0),
-                                          ),
-                                        ),
-                                        padding: const EdgeInsets.fromLTRB(7,7,11,7),
-                                        child: Text(
-                                          message.msg,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                          right:3,
-                                          bottom: 1,
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                TimeOfDay.fromDateTime(
-                                                  DateTime
-                                                      .fromMillisecondsSinceEpoch(
-                                                    int.parse(message.sent),
-                                                  ),
-                                                ).format(context),
-                                                style: TextStyle(
-                                                    color: darkMode
-                                                            ? Colors.white
-                                                                .withOpacity(.9)
-                                                            : Colors
-                                                                .blue.shade900,
-                                                    fontSize: 12),
-                                              ),
-                                              if(message.read.isEmpty) Icon(Icons.check,size: 17,
-                                                color: darkMode
-                                                    ? Colors.white
-                                                    .withOpacity(.9)
-                                                    : Colors
-                                                    .blue.shade900,),
-                                              if(message.read.isNotEmpty) Icon(MaterialCommunityIcons.check_all,size: 17,
-                                                color: darkMode
-                                                    ? Colors.white
-                                                    .withOpacity(.9)
-                                                    : Colors
-                                                    .blue.shade900,)
-                                            ],
-                                          ))
-                                    ],
-                                  ),
-                                ],
-                              );
+      children: [
+        Stack(
+          children: [
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: width * 0.8,
+              ),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      darkMode
+                          ? const Color(0xff9400D3)
+                          : const Color(0xffAFD5F0),
+                      darkMode
+                          ? const Color(0xff7C00B8)
+                          : const Color(0xffAFD5F0),
+                      darkMode
+                          ? const Color(0xff64009D)
+                          : const Color(0xff9DCAEB),
+                      darkMode
+                          ? const Color(0xff4B0081)
+                          : const Color(0xff9DCAEB),
+                    ]),
+                color: darkMode
+                    ? const Color(0xff47555E)
+                    : const Color(0xff7AA5D2),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(15),
+                  bottomLeft: Radius.circular(20),
+                  bottomRight: Radius.circular(0),
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(7, 7, 11, 7),
+              child: Text(
+                message.msg,
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            Positioned(
+                right: 3,
+                bottom: 1,
+                child: Row(
+                  children: [
+                    Text(
+                      TimeOfDay.fromDateTime(
+                        DateTime.fromMillisecondsSinceEpoch(
+                          int.parse(message.sent),
+                        ),
+                      ).format(context),
+                      style: TextStyle(
+                          color: darkMode
+                              ? Colors.white.withOpacity(.9)
+                              : Colors.blue.shade900,
+                          fontSize: 12),
+                    ),
+                    if (message.read.isEmpty)
+                      Icon(
+                        Icons.check,
+                        size: 17,
+                        color: darkMode
+                            ? Colors.white.withOpacity(.9)
+                            : Colors.blue.shade900,
+                      ),
+                    if (message.read.isNotEmpty)
+                      Icon(
+                        MaterialCommunityIcons.check_all,
+                        size: 17,
+                        color: darkMode
+                            ? Colors.white.withOpacity(.9)
+                            : Colors.blue.shade900,
+                      )
+                  ],
+                ))
+          ],
+        ),
+      ],
+    );
   }
-  Row friendMessages(double width, bool darkMode, Message message, BuildContext context) {
-    if(message.read.isEmpty){
-      FirebaseFirestore.instance.collection('chats/${getConversationId(message.fromUid)}/messages/').doc(message.sent).update(
-          {'read': DateTime
-              .now()
-              .millisecondsSinceEpoch
-              .toString()});
+
+  Row friendMessages(
+      double width, bool darkMode, Message message, BuildContext context) {
+    if (message.read.isEmpty) {
+      FirebaseFirestore.instance
+          .collection('chats/${getConversationId(message.fromUid)}/messages/')
+          .doc(message.sent)
+          .update({'read': DateTime.now().millisecondsSinceEpoch.toString()});
     }
     return Row(
-                                mainAxisAlignment:MainAxisAlignment.start,
-                                children: [
-                                  Stack(
-                                    children: [
-                                      Container(
-                                        constraints: BoxConstraints(
-                                          maxWidth: width * 0.8,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: (darkMode
-                                                  ? Colors.blueGrey.shade900
-                                                  : Colors.grey.shade200),
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft:Radius.circular(15),
-                                            topRight: Radius.circular(20),
-                                            bottomLeft:Radius.circular(0),
-                                            bottomRight:Radius.circular(20),
-                                          ),
-                                        ),
-                                        padding: const EdgeInsets.fromLTRB(
-                                            7, 7, 1, 7),
-                                        child: Text(
-                                          message.msg,
-                                          style: const TextStyle(
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                          right: 7,
-                                          bottom: 1,
-                                          child: Text(
-                                            TimeOfDay.fromDateTime(
-                                              DateTime
-                                                  .fromMillisecondsSinceEpoch(
-                                                int.parse(message.sent),
-                                              ),
-                                            ).format(context),
-                                            style: const TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 12),
-                                          ))
-                                    ],
-                                  ),
-                                ],
-                              );
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Stack(
+          children: [
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: width * 0.8,
+              ),
+              decoration: BoxDecoration(
+                color: (darkMode
+                    ? Colors.blueGrey.shade900
+                    : Colors.grey.shade200),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(15),
+                  topRight: Radius.circular(20),
+                  bottomLeft: Radius.circular(0),
+                  bottomRight: Radius.circular(20),
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(7, 7, 1, 7),
+              child: Text(
+                message.msg,
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            Positioned(
+                right: 7,
+                bottom: 1,
+                child: Text(
+                  TimeOfDay.fromDateTime(
+                    DateTime.fromMillisecondsSinceEpoch(
+                      int.parse(message.sent),
+                    ),
+                  ).format(context),
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                ))
+          ],
+        ),
+      ],
+    );
   }
 
   void snackbarchik(BuildContext context, bool darkMode, IconData icon,
