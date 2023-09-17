@@ -333,7 +333,7 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                       ),
                   openBuilder: (context, action) =>
-                      MyProfile(userModel: widget.userModel))),
+                      MyProfile(uid: widget.userModel.uid))),
           body: Column(
             children: [
               Expanded(

@@ -50,20 +50,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCji85txl4H-MrdyFiitMt7EHmYnTzwLfc',
-    appId: '1:855481836695:android:21b09f31bb483c1b2df5d2',
-    messagingSenderId: '855481836695',
-    projectId: 'telegram-app-ed069',
-    storageBucket: 'telegram-app-ed069.appspot.com',
+    apiKey: 'AIzaSyC0YGfLNiGVObq9-SjuyfSGPUgmcx6wINw',
+    appId: '1:842967052996:android:5b23f3a4c5e97036bd4f91',
+    messagingSenderId: '842967052996',
+    projectId: 'elbekgram',
+    storageBucket: 'elbekgram.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCoTkQ8gsc0qNtyZs99eGQXvQiUr-xkK4I',
-    appId: '1:855481836695:ios:88c8ed2118b60ff02df5d2',
-    messagingSenderId: '855481836695',
-    projectId: 'telegram-app-ed069',
-    storageBucket: 'telegram-app-ed069.appspot.com',
-    iosClientId: '855481836695-jkrhaaasq1jdbvthk7nhfummlb82ib3o.apps.googleusercontent.com',
-    iosBundleId: 'com.example.telegramApp',
+    apiKey: 'AIzaSyBRocOJ4K594kfEr7n4ZftVqMKOA4drIpQ',
+    appId: '1:842967052996:ios:5768614c42649759bd4f91',
+    messagingSenderId: '842967052996',
+    projectId: 'elbekgram',
+    storageBucket: 'elbekgram.appspot.com',
+    iosBundleId: 'com.example.elbekgram1',
   );
 }

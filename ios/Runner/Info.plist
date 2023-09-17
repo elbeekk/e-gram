@@ -7,8 +7,13 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
+	<string>Elbekgram</string>
+	<key>FirebaseDynamicLinksCustomDomains</key>
+    <array>
+        <string>https://custom.domain.io/path1</string>
+        <string>https://custom.domain.io/path2</string>
+    </array>
 
-	<string>Telegram App</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

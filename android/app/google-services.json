@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "855481836695",
-    "project_id": "telegram-app-ed069",
-    "storage_bucket": "telegram-app-ed069.appspot.com"
+    "project_number": "842967052996",
+    "project_id": "elbekgram",
+    "storage_bucket": "elbekgram.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:855481836695:android:21b09f31bb483c1b2df5d2",
+        "mobilesdk_app_id": "1:842967052996:android:5b23f3a4c5e97036bd4f91",
         "android_client_info": {
           "package_name": "com.example.elbekgram"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "855481836695-i2nac9imod3stuli3pk9bo0cn1stakib.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCji85txl4H-MrdyFiitMt7EHmYnTzwLfc"
+          "current_key": "AIzaSyC0YGfLNiGVObq9-SjuyfSGPUgmcx6wINw"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "855481836695-i2nac9imod3stuli3pk9bo0cn1stakib.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

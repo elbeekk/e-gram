@@ -2,22 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CLIENT_ID</key>
-	<string>855481836695-jkrhaaasq1jdbvthk7nhfummlb82ib3o.apps.googleusercontent.com</string>
-	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.855481836695-jkrhaaasq1jdbvthk7nhfummlb82ib3o</string>
 	<key>API_KEY</key>
-	<string>AIzaSyCoTkQ8gsc0qNtyZs99eGQXvQiUr-xkK4I</string>
+	<string>AIzaSyBRocOJ4K594kfEr7n4ZftVqMKOA4drIpQ</string>
 	<key>GCM_SENDER_ID</key>
-	<string>855481836695</string>
+	<string>842967052996</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.telegramApp</string>
+	<string>com.example.elbekgram1</string>
 	<key>PROJECT_ID</key>
-	<string>telegram-app-ed069</string>
+	<string>elbekgram</string>
 	<key>STORAGE_BUCKET</key>
-	<string>telegram-app-ed069.appspot.com</string>
+	<string>elbekgram.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:855481836695:ios:88c8ed2118b60ff02df5d2</string>
+	<string>1:842967052996:ios:5768614c42649759bd4f91</string>
 </dict>
 </plist>

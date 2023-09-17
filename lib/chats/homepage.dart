@@ -2,8 +2,10 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elbekgram/chats/chatpage.dart';
+import 'package:elbekgram/chats/profileview.dart';
 import 'package:elbekgram/usermodel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -20,21 +22,33 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   late Timer timer;
+  final FirebaseDynamicLinks dynamicLinks = FirebaseDynamicLinks.instance;
+  UserModel? userModel;
+
+  @override
+  void initState() {
+    initDynamicLinks();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    bool darkMode = Provider.of<VarProvider>(context).darkMode;
-    double width = MediaQuery.sizeOf(context).width;
+    bool darkMode = Provider
+        .of<VarProvider>(context)
+        .darkMode;
+    double width = MediaQuery
+        .sizeOf(context)
+        .width;
     return Scaffold(
         key: _key,
         drawer: const MyDrawer(),
         backgroundColor:
-            darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
+        darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
         appBar: AppBar(
           centerTitle: false,
           elevation: 0,
           backgroundColor:
-              darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
+          darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
           title: const Text('Elbekgram'),
           leading: InkWell(
               borderRadius: BorderRadius.circular(20),
@@ -57,7 +71,7 @@ class _HomePageState extends State<HomePage> {
           },
           elevation: 0,
           backgroundColor:
-              darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
+          darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
           child: const Icon(
             Icons.edit,
             color: Colors.white,
@@ -75,35 +89,37 @@ class _HomePageState extends State<HomePage> {
             if (snapshot.data!.docs.isEmpty) {
               return Center(
                   child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(''),
-                  SizedBox(
-                      height: MediaQuery.sizeOf(context).height * 0.4,
-                      child: Lottie.asset('assets/welcomel.json')),
-                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Welcome to Elbekgram',
-                        style: TextStyle(
-                            color: darkMode ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 20),
+                      const Text(''),
+                      SizedBox(
+                          height: MediaQuery
+                              .sizeOf(context)
+                              .height * 0.4,
+                          child: Lottie.asset('assets/welcomel.json')),
+                      Column(
+                        children: [
+                          Text(
+                            'Welcome to Elbekgram',
+                            style: TextStyle(
+                                color: darkMode ? Colors.white : Colors.black,
+                                fontWeight: FontWeight.w500,
+                                fontSize: 20),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 30, vertical: 10),
+                            child: Text(
+                              'Start messaging by tapping the pencil button in the bottom right corner.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Colors.grey.shade500),
+                            ),
+                          ),
+                        ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 30, vertical: 10),
-                        child: Text(
-                          'Start messaging by tapping the pencil button in the bottom right corner.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey.shade500),
-                        ),
-                      ),
+                      const Text(''),
                     ],
-                  ),
-                  const Text(''),
-                ],
-              ));
+                  ));
             }
             return ListView.builder(
               itemCount: snapshot.data!.docs.length,
@@ -115,10 +131,11 @@ class _HomePageState extends State<HomePage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ChatPage(
-                          uid: user.uid,
-                          userModel: user,
-                        ),
+                        builder: (context) =>
+                            ChatPage(
+                              uid: user.uid,
+                              userModel: user,
+                            ),
                       ),
                     );
                   },
@@ -138,8 +155,39 @@ class _HomePageState extends State<HomePage> {
           },
         ));
   }
-}
 
+  UserModel getUser(String uid)  {
+    StreamBuilder(
+      stream: FirebaseFirestore.instance.collection('users').snapshots(),
+      builder: (BuildContext context,AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
+        print('IIIIIIIIIIIIIII1');
+        debugPrint('IIIIIIIIIIIIIII1');
+        for(var i in snapshot.data!.docs){
+          i['uid']==uid;
+          print('IIIIIIIIIIIIIII ${i.toString()}');
+          debugPrint('IIIIIIIIIIIIIII ${i.toString()}');
+          setState(() {
+            userModel = UserModel.fromJson(i);
+          });
+        }
+        return const Text('');
+      },
+    );
+    return userModel ?? UserModel(city: "city", country: 'country', createdAt: 'createdAt', state: 'state',
+        uid: 'uid', userBio: 'userBio', userEmail: 'userEmail', userImages: [], userFName: 'userFName',
+        userLName: 'userLName');
+  }
+
+  Future<void> initDynamicLinks() async {
+    dynamicLinks.onLink.listen((dynamicLinkData) {
+      debugPrint('DATAAAAAAAAAA$dynamicLinkData');
+      print('DATAAAAAAAAAA$dynamicLinkData');
+      String link = dynamicLinkData.link.toString();
+      Navigator.pushAndRemoveUntil(context,
+          MaterialPageRoute(builder: (context) => MyProfile(uid: link.split('elbeekk/')[1]),),(route) => false,);
+    }).onError((e){debugPrint(e.me);});
+  }
+}
 class Customshape extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {

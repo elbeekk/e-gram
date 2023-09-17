@@ -303,7 +303,7 @@ class _MyContactsState extends State<MyContacts> {
                         return InkWell(
                           autofocus: true,
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => MyProfile(userModel: user),));
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => MyProfile(uid: user.uid),));
                           },
                           child: ListTile(
                             leading: CircleAvatar(
