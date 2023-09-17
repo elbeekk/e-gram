@@ -42,7 +42,7 @@ class _MyProfileState extends State<MyProfile> {
             backgroundColor:
             darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
             body: CustomScrollView(
-              slivers: [
+              slivers: <Widget>[
                 SliverAppBar(
                   elevation: 0,
                   pinned: true,
@@ -66,18 +66,17 @@ class _MyProfileState extends State<MyProfile> {
                       ),
                     ),
                     InkWell(
+
                       borderRadius: BorderRadius.circular(15),
                       onTap: () async {
                         DynamicLinkProvider().generateShareLink(user);
                       },
-                      child: Transform.rotate(
-                        angle: 3.14 / 1.3,
-                        child: SizedBox(
-                            width: width * .13,
-                            child: Icon(
-                              Ionicons.link_outline,
-                            )),
-                      ),
+
+                      child: SizedBox(
+                          width: width * .13,
+                          child: Icon(
+                            MaterialCommunityIcons.share,size: 28,
+                          )),
                     )
                   ],
                   leading: GestureDetector(
@@ -94,21 +93,21 @@ class _MyProfileState extends State<MyProfile> {
                       color: darkMode ? Colors.white : Colors.white,
                     ),
                   ),
-                  expandedHeight: height * 0.17,
+                  expandedHeight: height * 0.15,
                   stretch: true,
                   flexibleSpace: FlexibleSpaceBar(
                     titlePadding: EdgeInsets.only(
-                        left: width * 0.07, top: height * 0.07, bottom: 10),
+                        left: width * 0.12, top: height * 0.05, bottom: 10),
                     title: Row(
                       children: [
                         OpenContainer(
                           closedColor: darkMode
                               ? const Color(0xff47555E)
                               : const Color(0xff7AA5D2),
-                          transitionDuration: const Duration(milliseconds: 500),
+                          transitionDuration: const Duration(milliseconds: 700),
                           closedElevation: 0,
                           closedBuilder: (context, action) => CircleAvatar(
-                            radius: height * 0.026,
+                            radius: width * 0.05,
                             backgroundImage: NetworkImage(
                                user.userImages[
                                 user.userImages.length - 1]),
@@ -347,7 +346,7 @@ class _MyProfileState extends State<MyProfile> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
-                                  width: width * 0.4,
+                                  width: width * 0.38,
                                   child: Text(
                                     "${user.userFName} ${user.userLName}",
                                     style: const TextStyle(fontSize: 13),
@@ -690,6 +689,9 @@ class _MyProfileState extends State<MyProfile> {
                     ],
                   ),
                 ),
+                SliverToBoxAdapter(
+                  child: SizedBox(height: height*0.6,),
+                )
               ],
             ));
       },
