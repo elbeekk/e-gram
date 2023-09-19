@@ -15,12 +15,13 @@ class CreateAccount extends StatefulWidget {
   final String country;
   final String state;
   final String email;
+  final String password;
 
   const CreateAccount(
       {super.key,
       required this.city,
       required this.country,
-      required this.state, required this.email});
+      required this.state, required this.email, required this.password});
 
   @override
   State<CreateAccount> createState() => _CreateAccountState();
@@ -67,6 +68,7 @@ class _CreateAccountState extends State<CreateAccount> {
       'userBio': '',
       'userEmail':widget.email,
       'userFirstName': firstName.text,
+      'password': widget.password,
       'isOnline':true,
       'lastActive':DateTime.now().millisecondsSinceEpoch.toString(),
       'userLastName': lastName.text,

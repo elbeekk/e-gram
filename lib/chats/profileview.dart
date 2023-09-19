@@ -1,7 +1,7 @@
 import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:elbekgram/api/my_data_util.dart';
-import 'package:elbekgram/usermodel.dart';
+import 'package:elbekgram/helpers//my_data_util.dart';
+import 'package:elbekgram/helpers/api.dart';
+import 'package:elbekgram/models/usermodel.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:animations/animations.dart';
@@ -35,7 +35,7 @@ class _MyProfileState extends State<MyProfile> {
     double height = MediaQuery.sizeOf(context).height;
     double width = MediaQuery.sizeOf(context).width;
     return StreamBuilder(
-      stream: FirebaseFirestore.instance.collection('users').where('uid',isEqualTo: widget.uid).limit(1).snapshots(),
+      stream: API.getUserSnapshot(widget.uid),
       builder: (context, snapshot) {
         UserModel user = UserModel.fromJson(snapshot.data!.docs[0]);
         return Scaffold(
@@ -104,7 +104,11 @@ class _MyProfileState extends State<MyProfile> {
                           closedColor: darkMode
                               ? const Color(0xff47555E)
                               : const Color(0xff7AA5D2),
-                          transitionDuration: const Duration(milliseconds: 700),
+                          transitionDuration: const Duration(milliseconds: 500),
+                          transitionType: ContainerTransitionType.fade,
+
+                         openShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                         closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                           closedElevation: 0,
                           closedBuilder: (context, action) => CircleAvatar(
                             radius: width * 0.05,
@@ -349,7 +353,7 @@ class _MyProfileState extends State<MyProfile> {
                                   width: width * 0.38,
                                   child: Text(
                                     "${user.userFName} ${user.userLName}",
-                                    style: const TextStyle(fontSize: 13),
+                                    style: const TextStyle(fontSize: 14),
                                     overflow: TextOverflow.ellipsis,
                                   )),
                               SizedBox(
@@ -596,93 +600,93 @@ class _MyProfileState extends State<MyProfile> {
                                 ),
                               ),
                             ),
-                            Divider(
-                              color: darkMode ? Colors.black : Colors.grey,
-                              thickness: 0.2,
-                            ),
-                            InkWell(
-                              onTap: () {},
-                              child: Padding(
-                                padding: EdgeInsets.only(
-                                    left: width * 0.05,
-                                    top: 5,
-                                    bottom: 6),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          'Notifications',
-                                          style: TextStyle(
-                                              color: darkMode
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                              fontSize: 16),
-                                        ),
-                                        const SizedBox(
-                                          height: 5,
-                                        ),
-                                        Text(
-                                          isMuted ? 'Off' : 'On',
-                                          style:
-                                          const TextStyle(color: Colors.grey),
-                                        ),
-                                      ],
-                                    ),
-                                    VerticalDivider(
-                                      color: darkMode ? Colors.black : Colors.grey,
-                                      thickness: 10,
-                                      indent: 0,
-                                      width: 10,
-                                      endIndent: 0,
-                                    ),
-                                    SizedBox(
-                                      height: height * 0.05,
-                                      child: Row(
-                                        children: [
-                                          VerticalDivider(
-                                            color: darkMode
-                                                ? Colors.black
-                                                : Colors.grey,
-                                            thickness: .2,
-                                            indent: 5,
-                                            width: 2,
-                                            endIndent: 5,
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          InkWell(
-                                            onTap: () {
-                                              setState(() {
-                                                isMuted = !isMuted;
-                                              });
-
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.all(height*0.02),
-                                              child: Switch.adaptive(
-                                                activeColor: darkMode
-                                                    ? const Color(0xff47555E)
-                                                    : const Color(0xff7AA5D2),
-                                                value: !isMuted,
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    isMuted = !isMuted;
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
+                            // Divider(
+                            //   color: darkMode ? Colors.black : Colors.grey,
+                            //   thickness: 0.2,
+                            // ),
+                            // InkWell(
+                            //   onTap: () {},
+                            //   child: Padding(
+                            //     padding: EdgeInsets.only(
+                            //         left: width * 0.05,
+                            //         top: 5,
+                            //         bottom: 6),
+                            //     child: Row(
+                            //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            //       children: [
+                            //         Column(
+                            //           crossAxisAlignment: CrossAxisAlignment.start,
+                            //           children: [
+                            //             Text(
+                            //               'Notifications',
+                            //               style: TextStyle(
+                            //                   color: darkMode
+                            //                       ? Colors.white
+                            //                       : Colors.black,
+                            //                   fontSize: 16),
+                            //             ),
+                            //             const SizedBox(
+                            //               height: 5,
+                            //             ),
+                            //             Text(
+                            //               isMuted ? 'Off' : 'On',
+                            //               style:
+                            //               const TextStyle(color: Colors.grey),
+                            //             ),
+                            //           ],
+                            //         ),
+                            //         VerticalDivider(
+                            //           color: darkMode ? Colors.black : Colors.grey,
+                            //           thickness: 10,
+                            //           indent: 0,
+                            //           width: 10,
+                            //           endIndent: 0,
+                            //         ),
+                            //         SizedBox(
+                            //           height: height * 0.05,
+                            //           child: Row(
+                            //             children: [
+                            //               VerticalDivider(
+                            //                 color: darkMode
+                            //                     ? Colors.black
+                            //                     : Colors.grey,
+                            //                 thickness: .2,
+                            //                 indent: 5,
+                            //                 width: 2,
+                            //                 endIndent: 5,
+                            //               ),
+                            //               const SizedBox(
+                            //                 width: 10,
+                            //               ),
+                            //               InkWell(
+                            //                 onTap: () {
+                            //                   setState(() {
+                            //                     isMuted = !isMuted;
+                            //                   });
+                            //
+                            //                 },
+                            //                 child: Container(
+                            //                   padding: EdgeInsets.all(height*0.02),
+                            //                   child: Switch.adaptive(
+                            //                     activeColor: darkMode
+                            //                         ? const Color(0xff47555E)
+                            //                         : const Color(0xff7AA5D2),
+                            //                     value: !isMuted,
+                            //                     onChanged: (value) {
+                            //                       setState(() {
+                            //                         isMuted = !isMuted;
+                            //                       });
+                            //                     },
+                            //                   ),
+                            //                 ),
+                            //               ),
+                            //             ],
+                            //           ),
+                            //         )
+                            //       ],
+                            //     ),
+                            //   ),
+                            // ),
                           ],
                         ),
                       )

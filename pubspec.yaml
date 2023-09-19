@@ -60,6 +60,9 @@ dependencies:
   firebase_dynamic_links: ^5.3.5
   url_launcher: ^6.1.14
   flutter_share: ^2.0.0
+  firebase_messaging: ^14.6.7
+  device_info_plus: ^9.0.3
+  geolocator: ^10.0.1
 
 dev_dependencies:
   flutter_test:
@@ -69,7 +72,7 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
 #  remove_alpha_ios: true
-  image_path: "assets/telegram_logo.jpg"
+  image_path: "assets/logo.jpg"
   min_sdk_android: 21 # android min sdk min:16, default 21
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

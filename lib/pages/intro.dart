@@ -75,34 +75,29 @@ class _IntroPageState extends State<IntroPage> {
                       scrollDirection: Axis.horizontal,
                       children: [
                         Infos(
-                          title: 'Telegram',
-                          subtitle1: "The world's fastest messaging app.",
-                          subtitle2: "It is free and secure",
+                          title: 'e.gram',
+                          subtitle: "The world's fastest messaging app. It is free and secure",
                           darkMode: darkMode,
                         ),
                         Infos(
                           title: 'Fast',
-                          subtitle1: "Telegram delivers messages faster than",
-                          subtitle2: "any other application",
+                          subtitle: "Telegram delivers messages faster than any other application",
                           darkMode: darkMode,
                         ),
                         Infos(
                           title: 'Free',
-                          subtitle1:
-                              "Telegram provides free unlimited cloud storage for",
-                          subtitle2: "chats and media",
+                          subtitle:
+                              "Telegram provides free unlimited cloud storage for chats and media",
                           darkMode: darkMode,
                         ),
                         Infos(
                           title: 'Powerful',
-                          subtitle1: "Telegram has no limits on",
-                          subtitle2: "the size of your media and chats",
+                          subtitle: "Telegram has no limits on the size of your media and chats",
                           darkMode: darkMode,
                         ),
                         Infos(
                           title: 'Secure',
-                          subtitle1: "Telegram keeps your messages safe",
-                          subtitle2: "from hacker attacks",
+                          subtitle: "Telegram keeps your messages safe from hacker attacks",
                           darkMode: darkMode,
                         ),
                       ],
@@ -127,12 +122,11 @@ class _IntroPageState extends State<IntroPage> {
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.pushAndRemoveUntil(
+                  Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const RegPage(),
                     ),
-                    (route) => false,
                   );
                 },
                 child: Container(
@@ -162,15 +156,13 @@ class _IntroPageState extends State<IntroPage> {
 
 class Infos extends StatelessWidget {
   final String title;
-  final String subtitle1;
-  final String subtitle2;
+  final String subtitle;
   final bool darkMode;
 
   const Infos(
       {super.key,
       required this.title,
-      required this.subtitle1,
-      required this.subtitle2,
+      required this.subtitle,
       required this.darkMode});
 
   @override
@@ -184,13 +176,16 @@ class Infos extends StatelessWidget {
           style: TextStyle(
               color: darkMode ? Colors.white : Colors.black,
               fontWeight: FontWeight.w400,
-              fontSize: 30),
+              fontSize: 28),
         ),
-        Text(
-          "\n$subtitle1\n$subtitle2\n",
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-              color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 15),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: Colors.grey, fontWeight: FontWeight.w500, fontSize: 15),
+          ),
         ),
       ],
     );

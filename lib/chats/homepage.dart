@@ -1,15 +1,15 @@
 import 'dart:async';
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:elbekgram/api/api.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:elbekgram/helpers//api.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:elbekgram/chats/chatpage.dart';
 import 'package:elbekgram/chats/profileview.dart';
-import 'package:elbekgram/usermodel.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:elbekgram/models/usermodel.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:elbekgram/chats/menu_drawer.dart';
@@ -27,17 +27,30 @@ class _HomePageState extends State<HomePage> {
   late Timer timer;
   final FirebaseDynamicLinks dynamicLinks = FirebaseDynamicLinks.instance;
   UserModel? userModel;
-
+  late var DeviceInfo;
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   @override
   void initState() {
+    getDeviceInfo().whenComplete((){
+      if(TargetPlatform.iOS==defaultTargetPlatform){
+        API.updateIosInfo(DeviceInfo);
+      }else{
+        API.updateAndroidInfo(DeviceInfo);
+      }
+    });
     API.updateActiveStatus(true);
     SystemChannels.lifecycle.setMessageHandler((message) {
-      print('MEssage: $message');
       debugPrint('MEssage: $message');
-
       if(message.toString().contains('pause')) API.updateActiveStatus(false);
       if(message.toString().contains('resume')) API.updateActiveStatus(true);
-
+      getLocationInfo();
+      getDeviceInfo().whenComplete((){
+        if(TargetPlatform.iOS==defaultTargetPlatform){
+          API.updateIosInfo(DeviceInfo);
+        }else{
+          API.updateAndroidInfo(DeviceInfo);
+        }
+      });
       return Future.value(message);
     });
     initDynamicLinks();
@@ -62,7 +75,7 @@ class _HomePageState extends State<HomePage> {
           elevation: 0,
           backgroundColor:
           darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
-          title: const Text('Elbekgram'),
+          title: const Text('e.gram'),
           leading: InkWell(
               borderRadius: BorderRadius.circular(20),
               onTap: () => _key.currentState!.openDrawer(),
@@ -80,7 +93,6 @@ class _HomePageState extends State<HomePage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            FirebaseAuth.instance.signOut();
           },
           elevation: 0,
           backgroundColor:
@@ -91,7 +103,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         body: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('users').snapshots(),
+          stream: API.getAllUsers(),
           builder: (context,
               AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -146,18 +158,35 @@ class _HomePageState extends State<HomePage> {
                       MaterialPageRoute(
                         builder: (context) =>
                             ChatPage(
-                              uid: user.uid,
                               userModel: user,
                             ),
                       ),
                     );
                   },
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          user.userImages[user.userImages.length - 1]),
-                      radius: 25,
-                      backgroundColor: Colors.white,
+                    leading: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        CircleAvatar(
+                          backgroundImage: NetworkImage(
+                              user.userImages[user.userImages.length - 1]),
+                          radius: 25,
+                          backgroundColor: Colors.white,
+                        ),
+                        if(user.isOnline)Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: CircleAvatar(
+                            radius: 7,
+                            backgroundColor:
+                            darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
+                            child: const CircleAvatar(
+                              backgroundColor: Colors.green,
+                              radius: 6,
+                            ),
+                          ),
+                        )
+                      ],
                     ),
                     title: Text("${user.userFName} ${user.userLName}"),
                     subtitle: Text(user.userEmail),
@@ -168,25 +197,6 @@ class _HomePageState extends State<HomePage> {
           },
         ));
   }
-
-  UserModel getUser(String uid)  {
-    StreamBuilder(
-      stream: FirebaseFirestore.instance.collection('users').snapshots(),
-      builder: (BuildContext context,AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
-        for(var i in snapshot.data!.docs){
-          i['uid']==uid;
-          setState(() {
-            userModel = UserModel.fromJson(i);
-          });
-        }
-        return const Text('');
-      },
-    );
-    return userModel ?? UserModel(city: "city", country: 'country', createdAt: 'createdAt', state: 'state',
-        uid: 'uid', userBio: 'userBio', userEmail: 'userEmail', userImages: [], userFName: 'userFName',
-        userLName: 'userLName',lastActive: '',isOnline: false);
-  }
-
   Future<void> initDynamicLinks() async {
     dynamicLinks.onLink.listen((dynamicLinkData) {
       debugPrint('DATAAAAAAAAAA$dynamicLinkData');
@@ -195,6 +205,23 @@ class _HomePageState extends State<HomePage> {
       Navigator.pushAndRemoveUntil(context,
           MaterialPageRoute(builder: (context) => MyProfile(uid: link.split('elbeekk/')[1]),),(route) => false,);
     }).onError((e){debugPrint(e.me);});
+  }
+  Future<void> getDeviceInfo()async{
+    if(TargetPlatform.iOS==defaultTargetPlatform){
+      DeviceInfo = await deviceInfo.iosInfo;
+    }else{
+      DeviceInfo = await deviceInfo.androidInfo;
+    }
+
+
+  }
+  Future<void> getLocationInfo() async {
+    LocationPermission permission = await Geolocator.checkPermission();
+    if(permission != LocationPermission.denied && permission != LocationPermission.deniedForever) {
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.bestForNavigation);
+      API.updateLocationInfo(position);
+    }
+
   }
 }
 class Customshape extends CustomClipper<Path> {

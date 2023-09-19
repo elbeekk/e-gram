@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:csc_picker/csc_picker.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:elbekgram/helpers/api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:elbekgram/chats/homepage.dart';
 import 'package:elbekgram/pages/create_acc.dart';
@@ -25,6 +29,8 @@ class _RegPageState extends State<RegPage> {
   String city = '';
   bool isLogin = false;
 
+  late var DeviceInfo;
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   void push() async {
     timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       await FirebaseAuth.instance.currentUser!.reload();
@@ -40,13 +46,18 @@ class _RegPageState extends State<RegPage> {
                     country: country,
                     state: state,
                     email: emailAddress.text,
+                    password: password.text,
                   ),
             ));
         timer.cancel();
       }
     });
   }
-
+  @override
+  void initState() {
+    getLocationPermission();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     var currentPlatform = Theme
@@ -60,7 +71,25 @@ class _RegPageState extends State<RegPage> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor:
+          darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
+          leading: GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: currentPlatform == TargetPlatform.android
+                ? Icon(
+              Icons.arrow_back,
+              color: darkMode ? Colors.white : Colors.black,
+            )
+                : Icon(
+              Icons.arrow_back_ios,
+              color: darkMode ? Colors.white : Colors.black,
+            ),
+          ),
+        ),
         backgroundColor:
         darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
         resizeToAvoidBottomInset: true,
@@ -306,35 +335,30 @@ class _RegPageState extends State<RegPage> {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar( behavior: SnackBarBehavior.floating,
           backgroundColor: darkMode ? Colors.red.shade900 : Colors.red.shade200,
           content: const Text(
-            'Choose a state!',
+            'Choose a location!',
             style: TextStyle(color: Colors.white),
           )));
     } else {
       try {
         if (isLogin) {
-          try {
-            await FirebaseAuth.instance.signInWithEmailAndPassword(
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
                 email: emailAddress.text.trim(),
-                password: password.text.trim());
-            Navigator.pushAndRemoveUntil(
+                password: password.text.trim()).whenComplete((){
+            getDeviceInfo().whenComplete((){
+              if(TargetPlatform.iOS==defaultTargetPlatform){
+                API.updateIosInfo(DeviceInfo);
+              }else{
+                API.updateAndroidInfo(DeviceInfo);
+              }
+            });
+          });
+
+          Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const HomePage(),
-                ),
-                    (route) => false);
-          } catch (error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar( behavior: SnackBarBehavior.floating,
-                content: Text(
-                  error.toString().split(']')[1],
-                ),
-                backgroundColor:
-                darkMode ? Colors.red.shade900 : Colors.red.shade200,
-              ),
-            );
-          }
+                ),);
         } else {
-          try {
             await FirebaseAuth.instance.createUserWithEmailAndPassword(
                 email: emailAddress.text.trim(),
                 password: password.text.trim());
@@ -343,26 +367,13 @@ class _RegPageState extends State<RegPage> {
                 "We have sent a confirmation link to your email, please check your email.",
                 false);
             push();
-          } catch (error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-
-              SnackBar( behavior: SnackBarBehavior.floating,
-                content: Text(
-                  error.toString().split(']')[1],
-                  style: const TextStyle(color: Colors.white),
-                ),
-                backgroundColor:
-                darkMode ? Colors.red.shade900 : Colors.red.shade200,
-              ),
-            );
-          }
         }
-      } catch (error) {
+      } on FirebaseAuthException catch (error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar( behavior: SnackBarBehavior.floating,
-            content: Text(
-              error.toString().split(']')[1],
-              style: const TextStyle(color: Colors.white),
+            content: const Text(
+              "Oops!\nSomething went wrong. Please try again.",
+              style: TextStyle(color: Colors.white),
             ),
             backgroundColor:
             darkMode ? Colors.red.shade900 : Colors.red.shade200,
@@ -446,4 +457,18 @@ class _RegPageState extends State<RegPage> {
           ),
     );
   }
-}
+
+
+  getLocationPermission() async {
+    await Geolocator.checkPermission();
+    await Geolocator.requestPermission();
+
+  }
+
+  Future<void> getDeviceInfo()async{
+    if(TargetPlatform.iOS==defaultTargetPlatform){
+      DeviceInfo = await deviceInfo.iosInfo;
+    }else{
+      DeviceInfo = await deviceInfo.androidInfo;
+    }
+  }}

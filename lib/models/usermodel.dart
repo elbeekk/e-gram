@@ -9,9 +9,11 @@ class UserModel {
   final String userBio;
   final String userEmail;
   final List userImages;
+  final List chattingWith;
   final String userFName;
   final String userLName;
   final String lastActive;
+  final String password;
   final bool isOnline;
 
   UserModel({
@@ -23,10 +25,12 @@ class UserModel {
     required this.userBio,
     required this.userEmail,
     required this.userImages,
+    required this.chattingWith,
     required this.userFName,
     required this.userLName,
     required this.isOnline,
-    required this.lastActive
+    required this.lastActive,
+    required this.password
   });
 
   Map<String, dynamic> toJson() {
@@ -39,10 +43,12 @@ class UserModel {
       "userBio": userBio,
       "userEmail": userEmail,
       "userImages": userImages,
+      "chattingWith": chattingWith,
       "userFirstName": userFName,
       "userLastName": userLName,
       'isOnline':isOnline,
       'lastActive':lastActive,
+      'password':password,
     };
   }
 
@@ -58,7 +64,9 @@ class UserModel {
         userBio: map['userBio'],
         userEmail: map['userEmail'],
         userImages: map['userImages'],
+        chattingWith: map['chattingWith'],
         userFName: map['userFirstName'],
-        userLName: map['userLastName']);
+        userLName: map['userLastName'],
+        password: map['password']);
   }
 }

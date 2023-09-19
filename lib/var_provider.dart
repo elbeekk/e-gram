@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:elbekgram/usermodel.dart';
+import 'package:elbekgram/models/usermodel.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_share/flutter_share.dart';
@@ -9,12 +9,9 @@ import 'package:http/http.dart' as http;
 
 class VarProvider with ChangeNotifier {
   bool darkMode = false;
+  bool isOpen = false;
   String docIdCurrentUser = '';
 
-  void setDocId(String docId) {
-    docIdCurrentUser = docId;
-    notifyListeners();
-  }
 
   void changeMode(bool currentMode) {
     darkMode = !currentMode;

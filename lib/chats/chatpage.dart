@@ -1,23 +1,21 @@
 import 'package:animations/animations.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:elbekgram/api/my_data_util.dart';
+import 'package:elbekgram/helpers//api.dart';
+import 'package:elbekgram/helpers//my_data_util.dart';
 import 'package:elbekgram/chats/profileview.dart';
-import 'package:elbekgram/messagemodel.dart';
-import 'package:elbekgram/usermodel.dart';
+import 'package:elbekgram/helpers/widgets.dart';
+import 'package:elbekgram/models/messagemodel.dart';
+import 'package:elbekgram/models/usermodel.dart';
 import 'package:elbekgram/var_provider.dart';
-import 'package:elbekgram/widgets/messagemodel.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:provider/provider.dart';
 
 class ChatPage extends StatefulWidget {
-  final String uid;
   UserModel userModel;
 
-  ChatPage({super.key, required this.uid, required this.userModel});
+  ChatPage({super.key,required this.userModel});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -34,37 +32,24 @@ class _ChatPageState extends State<ChatPage> {
   bool showEmoji = false;
   TextEditingController controller = TextEditingController();
 
-  static String getConversationId(String id) =>
-      FirebaseAuth.instance.currentUser!.uid.hashCode <= id.hashCode
-          ? "${FirebaseAuth.instance.currentUser!.uid}_$id"
-          : "${id}_${FirebaseAuth.instance.currentUser!.uid}";
 
-  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllMessages(
-      UserModel user1) {
-    return FirebaseFirestore.instance
-        .collection('chats/${getConversationId(user1.uid)}/messages/')
-        .orderBy('sent', descending: true)
-        .snapshots();
-  }
+
 
   static Future<void> sendMessage(UserModel user, String msg) async {
     final time = DateTime.now().millisecondsSinceEpoch.toString();
     final Message message = Message(
         toUid: user.uid,
-        msg: "$msg              ",
+        msg: "$msg               ",
         read: '',
-        fromUid: FirebaseAuth.instance.currentUser!.uid,
+        fromUid: API.currentUserAuth()!.uid,
         sent: time,
         type: Type.text);
-    final ref = FirebaseFirestore.instance
-        .collection('chats/${getConversationId(user.uid)}/messages/')
-        .doc(time.toString());
-    await ref.set(message.toJson());
+    final ref = API.sendMessage(time.toString(), user.uid);
+    await ref.set(message.toJson()).then((value) => API.sendPushNotification(user, msg));
   }
 
   @override
   void initState() {
-    generateGroupId();
     super.initState();
   }
 
@@ -104,18 +89,15 @@ class _ChatPageState extends State<ChatPage> {
                       ? const Color(0xff47555E)
                       : const Color(0xff7AA5D2),
                   closedElevation: 0,
+                  openShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  closedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                   transitionDuration: const Duration(milliseconds: 500),
                   transitionType: ContainerTransitionType.fade,
                   closedBuilder: (context, action) => StreamBuilder(
-                        stream: FirebaseFirestore.instance
-                            .collection('users')
-                            .where('uid', isEqualTo: widget.uid)
-                            .limit(1)
-                            .snapshots(),
+                        stream: API.getUserSnapshot(widget.userModel.uid),
                         builder: (context, snapshot) {
                           final data = snapshot.data?.docs;
                           final list = data?.map((e) => UserModel.fromJson(e)).toList()??[];
-
                           return SizedBox(
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -278,20 +260,8 @@ class _ChatPageState extends State<ChatPage> {
                                             ),
                                           ),
                                           PopupMenuItem(
-                                            onTap: () async {
-                                              await FirebaseFirestore.instance
-                                                  .collection('chats')
-                                                  .doc(getConversationId(
-                                                      widget.userModel.uid))
-                                                  .collection('messages')
-                                                  .get()
-                                                  .then(
-                                                (value) {
-                                                  for (var i in value.docs) {
-                                                    i.reference.delete();
-                                                  }
-                                                },
-                                              );
+                                            onTap: (){
+                                              API.deleteAllMessages(widget.userModel.uid);
                                             },
                                             child: const Row(
                                               children: [
@@ -368,7 +338,7 @@ class _ChatPageState extends State<ChatPage> {
                         fit: BoxFit.cover),
                   ),
                   child: StreamBuilder(
-                    stream: getAllMessages(widget.userModel),
+                    stream: API.getAllMessages(widget.userModel),
                     builder: (context, snapshot) {
                       return ListView.builder(
                           padding: const EdgeInsets.only(bottom: 5),
@@ -378,7 +348,7 @@ class _ChatPageState extends State<ChatPage> {
                             final message =
                                 Message.fromJson(snapshot.data!.docs[index]);
                             final isMe = message.fromUid ==
-                                    FirebaseAuth.instance.currentUser!.uid
+                                   API.currentUserAuth()!.uid
                                 ? true
                                 : false;
                             return Padding(
@@ -422,20 +392,7 @@ class _ChatPageState extends State<ChatPage> {
                                       items: [
                                         PopupMenuItem(
                                             onTap: () async {
-                                              await FirebaseFirestore.instance
-                                                  .collection('chats')
-                                                  .doc(getConversationId(
-                                                      widget.userModel.uid))
-                                                  .collection('messages')
-                                                  .doc(message.sent)
-                                                  .delete()
-                                                  .whenComplete(() =>
-                                                      snackbarchik(
-                                                          context,
-                                                          darkMode,
-                                                          Icons.delete_outline,
-                                                          'Successfully deleted',
-                                                          true));
+                                             API.deleteOneMessage(widget.userModel.uid, message, context, darkMode);
                                             },
                                             child: const Row(
                                               children: [
@@ -456,7 +413,7 @@ class _ChatPageState extends State<ChatPage> {
                                                   editMes = message.msg;
                                                   controller.text = message
                                                       .msg.characters
-                                                      .skipLast(14)
+                                                      .skipLast(15)
                                                       .toString();
                                                   editMesTime = message.sent;
                                                 });
@@ -476,9 +433,9 @@ class _ChatPageState extends State<ChatPage> {
                                                   ClipboardData(
                                                       text: message
                                                           .msg.characters
-                                                          .skipLast(14)
+                                                          .skipLast(15)
                                                           .toString()));
-                                              snackbarchik(
+                                              Widgets.snackBar(
                                                   context,
                                                   darkMode,
                                                   Icons.copy,
@@ -622,8 +579,9 @@ class _ChatPageState extends State<ChatPage> {
                               padding: const EdgeInsets.only(bottom: 4),
                               child: TextField(
                                 onTap: () {
-                                  if (showEmoji)
+                                  if (showEmoji) {
                                     setState(() => showEmoji = !showEmoji);
+                                  }
                                 },
                                 textInputAction: TextInputAction.newline,
                                 onChanged: (value) {
@@ -668,30 +626,22 @@ class _ChatPageState extends State<ChatPage> {
                               if (controller.text.trim().isNotEmpty) {
                                 if (isEdit) {
                                   if (controller.text != editMes) {
-                                    await FirebaseFirestore.instance
-                                        .collection('chats')
-                                        .doc(getConversationId(
-                                            widget.userModel.uid))
-                                        .collection('messages')
-                                        .doc(editMesTime)
-                                        .update(
-                                      {
-                                        'msg':
-                                            '${controller.text.trim().toString()}              ',
-                                      },
+                                      API.editMessage(widget.userModel.uid, editMesTime,controller.text.trim().toString()
                                     );
+                                    if(controller.text!=editMes.trim()) {
+                                      Widgets.snackBar(
+                                        context,
+                                        darkMode,
+                                        Icons.edit_outlined,
+                                        "Successfully edited",
+                                        false);
+                                    }
                                     setState(() {
                                       isEdit = false;
                                       controller.clear();
                                       editMesTime = '';
                                       editMes = '';
                                     });
-                                    snackbarchik(
-                                        context,
-                                        darkMode,
-                                        Icons.edit_outlined,
-                                        "Successfully edited",
-                                        false);
                                   } else {
                                     setState(() {
                                       isEdit = false;
@@ -701,17 +651,7 @@ class _ChatPageState extends State<ChatPage> {
                                     });
                                   }
                                 } else {
-                                  updateDataFirestore(
-                                    'users',
-                                    FirebaseAuth.instance.currentUser!.uid,
-                                    {
-                                      'chattingWith': FieldValue.arrayUnion(
-                                        [
-                                          widget.uid.toString(),
-                                        ],
-                                      ),
-                                    },
-                                  );
+                                  API.addToChattingWith(widget.userModel.uid.toString());
                                   sendMessage(
                                       widget.userModel, controller.text.trim());
                                   setState(() {
@@ -893,10 +833,7 @@ class _ChatPageState extends State<ChatPage> {
   Row friendMessages(
       double width, bool darkMode, Message message, BuildContext context) {
     if (message.read.isEmpty) {
-      FirebaseFirestore.instance
-          .collection('chats/${getConversationId(message.fromUid)}/messages/')
-          .doc(message.sent)
-          .update({'read': DateTime.now().millisecondsSinceEpoch.toString()});
+     API.updateReadStatus(message);
     }
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -943,67 +880,7 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  void snackbarchik(BuildContext context, bool darkMode, IconData icon,
-      String text, bool isDel) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-        backgroundColor: isDel
-            ? darkMode
-                ? Colors.red.shade900
-                : Colors.red.shade200
-            : darkMode
-                ? const Color(0xff47555E)
-                : const Color(0xff7AA5D2),
-        content: Row(
-          children: [
-            Icon(
-              icon,
-              color: Colors.white,
-            ),
-            const SizedBox(
-              width: 5,
-            ),
-            Text(
-              text,
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.w500),
-            )
-          ],
-        )));
-  }
 
-  void generateGroupId() {
-    currentUserId = FirebaseAuth.instance.currentUser!.uid;
-    peerId = widget.uid;
-    if (currentUserId.compareTo(peerId) > 0) {
-      groupChatId = "$currentUserId-$peerId";
-    } else {
-      groupChatId = "$peerId-$currentUserId";
-    }
-  }
 
-  sendChat({required String message}) async {
-    MessageChat chat = MessageChat(
-        idFrom: currentUserId,
-        idTo: peerId,
-        timestamp: Timestamp.now().toString(),
-        content: message);
-    await FirebaseFirestore.instance
-        .collection('groupMessages')
-        .doc(groupChatId)
-        .collection('messages')
-        .add(chat.tojson());
-  }
 
-  Future<void> updateDataFirestore(
-    String collectionPath,
-    String docPath,
-    Map<String, dynamic> dataNeedUpdate,
-  ) {
-    return FirebaseFirestore.instance
-        .collection(collectionPath)
-        .doc(docPath)
-        .update(dataNeedUpdate);
-  }
 }

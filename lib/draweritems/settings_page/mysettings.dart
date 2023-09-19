@@ -1,12 +1,15 @@
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:elbekgram/helpers//api.dart';
+import 'package:elbekgram/helpers/my_data_util.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:http/http.dart'as http;
 import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elbekgram/draweritems/settings_page/editpage.dart';
-import 'package:elbekgram/pages/intro.dart';
-import 'package:elbekgram/usermodel.dart';
+import 'package:elbekgram/models/usermodel.dart';
 import 'package:elbekgram/var_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +33,8 @@ class _MySettingsState extends State<MySettings> {
   XFile? image;
   TextEditingController bioCon = TextEditingController();
   TextEditingController emailCon = TextEditingController();
-
+  late var DeviceInfo;
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   @override
   Widget build(BuildContext context) {
     var currentPlatform = Theme.of(context).platform;
@@ -117,14 +121,14 @@ class _MySettingsState extends State<MySettings> {
                             ),
                             PopupMenuItem(
                               onTap: () async {
-                                await FirebaseAuth.instance.signOut();
-                                Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const IntroPage(),
-                                    ),
-                                    (route) => false);
-                              },
+                                getDeviceInfo().whenComplete((){
+                                  if(TargetPlatform.iOS==defaultTargetPlatform){
+                                    API.iosSignOut(context,DeviceInfo);
+                                  }else{
+                                    API.androidSignOut(context,DeviceInfo);
+                                  }
+                                });
+                                },
                               child: Row(
                                 children: [
                                   const Padding(
@@ -454,7 +458,7 @@ class _MySettingsState extends State<MySettings> {
                                 SizedBox(
                                     width: width * 0.4,
                                     child: Text(
-                                      user.userEmail,
+                                      API.currentUserAuth()!.email ?? '',
                                       style: const TextStyle(fontSize: 12),
                                       overflow: TextOverflow.ellipsis,
                                     )),
@@ -478,7 +482,7 @@ class _MySettingsState extends State<MySettings> {
                               Padding(
                                 padding: EdgeInsets.only(left: width * 0.05),
                                 child: const Text(
-                                  'Account',
+                                  'Info',
                                   style: TextStyle(
                                       color: Color(0xff7AA5D2),
                                       fontWeight: FontWeight.w500,
@@ -516,10 +520,9 @@ class _MySettingsState extends State<MySettings> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => EditPage(
-                                              title: "Bio",
-                                              user: user,
                                               info: user.userBio,
-                                              controller: bioCon)));
+                                            isBio: true,
+                                          )));
                                 },
                                 child: Container(
                                   padding: EdgeInsets.only(
@@ -548,13 +551,60 @@ class _MySettingsState extends State<MySettings> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(
-                                height: 12,
+                              InkWell(
+                                onLongPress: () async {
+                                  await Clipboard.setData(ClipboardData(
+                                      text:
+                                      "${user.country.characters.skip(5)}, ${user.state}, ${user.city}"));
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                      behavior: SnackBarBehavior.floating,
+                                      duration: const Duration(seconds: 1),
+                                      backgroundColor: darkMode
+                                          ? const Color(0xff47555E)
+                                          : const Color(0xff7AA5D2),
+                                      content: const Row(
+                                        children: [
+                                          Icon(
+                                            Icons.copy,
+                                            color: Colors.white,
+                                          ),
+                                          Text(
+                                            '  Location copied to clipboard',
+                                            style: TextStyle(color: Colors.white),
+                                          )
+                                        ],
+                                      )));
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      left: width * 0.05, top: 5, bottom: 5),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Row(),
+                                      Text(
+                                        "${user.country.characters.skip(5)}, ${user.state}, ${user.city}",
+                                        style: TextStyle(
+                                            color: darkMode
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 16),
+                                      ),
+                                      const SizedBox(
+                                        height: 7,
+                                      ),
+                                      const Text(
+                                        'Location',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                               InkWell(
                                 onLongPress: () async {
                                   await Clipboard.setData(
-                                      ClipboardData(text: user.userEmail));
+                                      ClipboardData(text: API.currentUserAuth()!.email ?? ''));
                                   ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar( behavior: SnackBarBehavior.floating,
                                           duration: const Duration(seconds: 1),
@@ -579,11 +629,11 @@ class _MySettingsState extends State<MySettings> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => EditPage(
-                                              title: 'Email',
-                                              user: user,
-                                              info: user.userEmail,
-                                              controller: emailCon)));
+                                          builder: (context) =>
+                                              EditPage(
+                                              info: API.currentUserAuth()!.email ?? '',
+                                                isBio: false,)
+                                      ));
                                 },
                                 child: Container(
                                   padding: EdgeInsets.only(
@@ -594,7 +644,7 @@ class _MySettingsState extends State<MySettings> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        user.userEmail,
+                                        API.currentUserAuth()!.email ?? '',
                                         style: TextStyle(
                                             color: darkMode
                                                 ? Colors.white
@@ -613,9 +663,55 @@ class _MySettingsState extends State<MySettings> {
                                   ),
                                 ),
                               ),
-                              Divider(
-                                color: darkMode ? Colors.black : Colors.grey,
-                                thickness: 0.2,
+                              InkWell(
+                                onLongPress: () async {
+                                  await Clipboard.setData(ClipboardData(
+                                      text:
+                                      "${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).day} ${MyDataUtil.getMonth(DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)))} ${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).year}"));
+                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                      behavior: SnackBarBehavior.floating,
+                                      duration: const Duration(seconds: 1),
+                                      backgroundColor: darkMode
+                                          ? const Color(0xff47555E)
+                                          : const Color(0xff7AA5D2),
+                                      content: const Row(
+                                        children: [
+                                          Icon(
+                                            Icons.copy,
+                                            color: Colors.white,
+                                          ),
+                                          Text(
+                                            '  Joined Time copied to clipboard',
+                                            style: TextStyle(color: Colors.white),
+                                          )
+                                        ],
+                                      )));
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.only(
+                                      left: width * 0.05, top: 5, bottom: 5),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Row(),
+                                      Text(
+                                        "${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).day} ${MyDataUtil.getMonth(DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)))} ${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).year}",
+                                        style: TextStyle(
+                                            color: darkMode
+                                                ? Colors.white
+                                                : Colors.black,
+                                            fontSize: 16),
+                                      ),
+                                      const SizedBox(
+                                        height: 7,
+                                      ),
+                                      const Text(
+                                        'Joined On',
+                                        style: TextStyle(color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             ],
                           ),
@@ -704,5 +800,13 @@ class _MySettingsState extends State<MySettings> {
                                       ),
                                     ]),
                               );
+  }
+
+  Future<void> getDeviceInfo()async{
+    if(TargetPlatform.iOS==defaultTargetPlatform){
+      DeviceInfo = await deviceInfo.iosInfo;
+    }else{
+      DeviceInfo = await deviceInfo.androidInfo;
+    }
   }
 }

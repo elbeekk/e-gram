@@ -13,7 +13,6 @@ import 'package:elbekgram/var_provider.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    // name: 'elbekgram',
     options: DefaultFirebaseOptions.currentPlatform,
   );
   SystemChrome.setPreferredOrientations([
@@ -55,7 +54,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     bool darkMode = Provider.of<VarProvider>(context).darkMode;
     return MaterialApp(
-        title: "Elbekgram",
+        title: "e.gram",
         theme: ThemeData(
             brightness: darkMode ? Brightness.dark : Brightness.light),
         debugShowCheckedModeBanner: false,

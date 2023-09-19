@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elbekgram/draweritems/settings_page/mysettings.dart';
-import 'package:elbekgram/usermodel.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:elbekgram/helpers/api.dart';
+import 'package:elbekgram/helpers/widgets.dart';
+import 'package:elbekgram/models/usermodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:provider/provider.dart';
@@ -18,9 +19,8 @@ class MyDrawer extends StatefulWidget {
 }
 
 class _MyDrawerState extends State<MyDrawer> {
-  double turns = 1;
-  double turns1 = 1;
-  bool isOpen = false;
+
+
   late UserModel user;
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class _MyDrawerState extends State<MyDrawer> {
       backgroundColor:
           darkMode ? const Color(0xff303841) : const Color(0xffEEEEEE),
       child: StreamBuilder(
-        stream: FirebaseFirestore.instance.collection('users').snapshots(),
+        stream: API.getAllUsers(),
         builder: (BuildContext context,
             AsyncSnapshot<QuerySnapshot<Map<String, dynamic>>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -39,7 +39,7 @@ class _MyDrawerState extends State<MyDrawer> {
             );
           }
           for (var i in snapshot.data!.docs){
-            if(i.id==FirebaseAuth.instance.currentUser!.uid){
+            if(i.id==API.currentUserAuth()!.uid){
               user = UserModel.fromJson(i);
             }
           }
@@ -48,123 +48,48 @@ class _MyDrawerState extends State<MyDrawer> {
               children: [
                 Container(
                   padding:  EdgeInsets.fromLTRB(15, height*.075 , 0, 0),
-                  height: height * 0.25,
+                  height: height * 0.2,
                   decoration: BoxDecoration(
-                    color: darkMode
+                    color:
+                    darkMode
                         ? const Color(0xff47555E)
                         : const Color(0xff7AA5D2),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Padding(
-                        padding:  EdgeInsets.only(bottom: height*.02,),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            CircleAvatar(
-                              radius: 32,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          GestureDetector(
+                            onTap:() {
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => const MySettings(),));
+                            },
+                            child: CircleAvatar(
+                              radius: height*0.043,
                               backgroundImage: NetworkImage(user.userImages[user.userImages.length-1]),
                               backgroundColor: Colors.white,
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${user.userFName} ${user.userLName}",
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                                const SizedBox(
-                                  height: 7,
-                                ),
-                                Text(
-                                  user.userEmail,
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 13),
-                                )
-                              ],
-                            )
-                          ],
-                        ),
+                          ),
+                          const Spacer(),
+                        ],
                       ),
-                      Column(
+                      const Column(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          InkWell(
-                            onTap: (){
-                              if (darkMode) {
-                                setState(() => turns -= 1 / 4);
-                              } else {
-                                setState(() => turns += 1 / 4);
-                              }
-                              Provider.of<VarProvider>(context, listen: false)
-                                  .changeMode(darkMode);
-                            },
-                            child: AnimatedRotation(
-                                curve: Curves.easeOutExpo,
-                                turns: turns,
-                                duration: const Duration(seconds: 2),
-                                child: darkMode
-                                    ? const Icon(
-                                  Icons.sunny,
-                                  color: Colors.white,
-                                  size: 30,
-                                )
-                                    : const Icon(
-                                  Icons.dark_mode,
-                                  color: Colors.white,
-                                  size: 30,
-                                )),
-                          ),
-                          InkWell(
-                            onTap: () {
-                              if (isOpen) {
-                                setState(() {
-                                  turns1 -= .5;
-                                  isOpen = false;
-                                });
-                              } else {
-                                setState(() {
-                                  turns1 += .5;
-                                  isOpen = true;
-                                });
-                              }
-                            },
-                            child: Container(
-                              padding:  EdgeInsets.fromLTRB(
-                                height*.02,
-                                height*.02,
-                                height*.02,
-                                height*.02,
-                              ),
-                              child: AnimatedRotation(
-                                curve: Curves.easeOutExpo,
-                                duration: const Duration(seconds: 1),
-                                turns: turns1,
-                                child: Transform.rotate(
-                                    angle: 3.14 / 2,
-                                    child: const Center(
-                                      child: Icon(
-                                        Icons.arrow_forward_ios,
-                                        color: Colors.white,
-                                        size: 19,
-                                      ),
-                                    )),
-                              ),
-                            ),
-                          )
+                          DarkModeSwitcher(),
                         ],
                       ),
                     ],
                   ),
                 ),
+                AccountSwitcher(me: user,name: "${user.userFName} ${user.userLName}",),
+
                 MyDrawerItem(darkMode: darkMode, title: 'My Stories', icon: MaterialCommunityIcons.play_box_multiple_outline,route: const MyStories(),),
                 Divider(
                   height: 5,
+                  thickness: darkMode ? 0: 1,
                   indent: 0,
                   endIndent: 0,
                   color: darkMode ? const Color(0xff000409):Colors.grey.shade300,
@@ -178,6 +103,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 Divider(
                   height: 5,
                   indent: 0,
+                  thickness: darkMode ? 0: 1,
                   endIndent: 0,
                   color:darkMode ? const Color(0xff000409):Colors.grey.shade300,
                 ),
