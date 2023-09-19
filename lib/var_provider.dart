@@ -4,9 +4,7 @@ import 'package:elbekgram/models/usermodel.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_share/flutter_share.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
-
 class VarProvider with ChangeNotifier {
   bool darkMode = false;
   bool isOpen = false;

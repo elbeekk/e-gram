@@ -1,11 +1,15 @@
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:elbekgram/draweritems/settings_page/editname.dart';
 import 'package:elbekgram/helpers//api.dart';
+import 'package:elbekgram/helpers/image_picker.dart';
 import 'package:elbekgram/helpers/my_data_util.dart';
+import 'package:elbekgram/helpers/widgets.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gallery_saver/gallery_saver.dart';
-import 'package:http/http.dart'as http;
+import 'package:http/http.dart' as http;
 import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elbekgram/draweritems/settings_page/editpage.dart';
@@ -14,6 +18,7 @@ import 'package:elbekgram/var_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -29,12 +34,34 @@ class MySettings extends StatefulWidget {
 
 class _MySettingsState extends State<MySettings> {
   late UserModel user;
+  PageController controller = PageController();  
   int currentIndex = 0;
   XFile? image;
+  String link = '';
   TextEditingController bioCon = TextEditingController();
   TextEditingController emailCon = TextEditingController();
   late var DeviceInfo;
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  Future<void> onclick(ImageSource source,bool darkMode)async{
+    image = await ImagePickerService.pickCropImage(cropAspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1), imageSource: source,darkMode: darkMode);
+    final file = File(image!.path);
+    final ref = FirebaseStorage.instance.ref().child('users/${API.currentUserAuth()?.uid ?? ''}/${image!.name}');
+    var uploadTask = ref.putFile(file).whenComplete(() async { link = await ref.getDownloadURL();});
+    await uploadTask.whenComplete(() async {
+      try {
+            if(link.isNotEmpty){return await FirebaseFirestore.instance.collection('users').doc(API.currentUserAuth()!.uid).update(
+                {'userImages':FieldValue.arrayUnion([link])}).whenComplete((){ image=null;
+            link='';});}
+      } catch (onError) {
+        Widgets.snackBar(context, darkMode, Icons.error_outline, "", true);
+        print("Error (could not get URL)");
+        setState(() {
+          link = 'https://t4.ftcdn.net/jpg/00/65/77/27/240_F_65772719_A1UV5kLi5nCEWI0BNLLiFaBPEkUbv5Fv.jpg';
+        });
+      }
+    });
+    setState(() {});
+  }
   @override
   Widget build(BuildContext context) {
     var currentPlatform = Theme.of(context).platform;
@@ -77,6 +104,16 @@ class _MySettingsState extends State<MySettings> {
                         itemBuilder: (context) {
                           var list = <PopupMenuEntry<Object>>[
                             PopupMenuItem(
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => EditName(
+                                        fName: user.userFName,
+                                        lName: user.userLName,
+                                      ),
+                                    ));
+                              },
                               child: Row(
                                 children: [
                                   const Padding(
@@ -121,14 +158,15 @@ class _MySettingsState extends State<MySettings> {
                             ),
                             PopupMenuItem(
                               onTap: () async {
-                                getDeviceInfo().whenComplete((){
-                                  if(TargetPlatform.iOS==defaultTargetPlatform){
-                                    API.iosSignOut(context,DeviceInfo);
-                                  }else{
-                                    API.androidSignOut(context,DeviceInfo);
+                                getDeviceInfo().whenComplete(() {
+                                  if (TargetPlatform.iOS ==
+                                      defaultTargetPlatform) {
+                                    API.iosSignOut(context, DeviceInfo);
+                                  } else {
+                                    API.androidSignOut(context, DeviceInfo);
                                   }
                                 });
-                                },
+                              },
                               child: Row(
                                 children: [
                                   const Padding(
@@ -253,17 +291,31 @@ class _MySettingsState extends State<MySettings> {
                                                       var list =
                                                           <PopupMenuEntry<
                                                               Object>>[
-                                                                PopupMenuItem(
-                                                          onTap:() async {
-                                                            final urlImage = user.userImages[currentIndex];
-                                                            final url = Uri.parse(urlImage);
-                                                            final response = await http.get(url);
-                                                            final bytes = response.bodyBytes;
-                                                            final temp = await getTemporaryDirectory();
-                                                            final path = "${temp.path}/image.jpg";
-                                                            File(path).writeAsBytesSync(bytes);
-                                                            await Share.shareFiles([path],text: 'Profile photo of ${user.userFName} ${user.userLName} in Elbekgram');
-
+                                                        PopupMenuItem(
+                                                          onTap: () async {
+                                                            final urlImage = user
+                                                                    .userImages[
+                                                                currentIndex];
+                                                            final url =
+                                                                Uri.parse(
+                                                                    urlImage);
+                                                            final response =
+                                                                await http
+                                                                    .get(url);
+                                                            final bytes =
+                                                                response
+                                                                    .bodyBytes;
+                                                            final temp =
+                                                                await getTemporaryDirectory();
+                                                            final path =
+                                                                "${temp.path}/image.jpg";
+                                                            File(path)
+                                                                .writeAsBytesSync(
+                                                                    bytes);
+                                                            await Share
+                                                                .shareFiles([
+                                                              path
+                                                            ], text: 'Profile photo of ${user.userFName} ${user.userLName} in Elbekgram');
                                                           },
                                                           child: const Row(
                                                             children: [
@@ -290,17 +342,34 @@ class _MySettingsState extends State<MySettings> {
                                                         ),
                                                         PopupMenuItem(
                                                           onTap: () async {
-
-                                                            final urlImage = user.userImages[user.userImages.length-1-currentIndex];
-                                                            try{
-                                                              final tempDir = await getTemporaryDirectory();
-                                                              final path = "${tempDir.path}/${user.uid}$currentIndex.jpg";
-                                                              await Dio().download(urlImage, path);
-                                                              await GallerySaver.saveImage(path,albumName: 'Elbekgram',).whenComplete(() => print('||||||||||||||| SAVED ||||||||||||||'));
-                                                            }catch(e){
-                                                              print("############### ${e.toString()} ###############");
+                                                            final urlImage = user
+                                                                .userImages[user
+                                                                    .userImages
+                                                                    .length -
+                                                                1 -
+                                                                currentIndex];
+                                                            try {
+                                                              final tempDir =
+                                                                  await getTemporaryDirectory();
+                                                              final path =
+                                                                  "${tempDir.path}/${user.uid}$currentIndex.jpg";
+                                                              await Dio()
+                                                                  .download(
+                                                                      urlImage,
+                                                                      path);
+                                                              await GallerySaver
+                                                                  .saveImage(
+                                                                path,
+                                                                albumName:
+                                                                    'Elbekgram',
+                                                              ).whenComplete(
+                                                                  () => print(
+                                                                      '||||||||||||||| SAVED ||||||||||||||'));
+                                                            } catch (e) {
+                                                              print(
+                                                                  "############### ${e.toString()} ###############");
                                                             }
-                                                            },
+                                                          },
                                                           child: const Row(
                                                             children: [
                                                               Padding(
@@ -317,6 +386,34 @@ class _MySettingsState extends State<MySettings> {
                                                               ),
                                                               Text(
                                                                 'Save to Gallery',
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .white),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                            if(user.userImages.length>1)PopupMenuItem(
+                                                          onTap:() async {
+                                                            if(user.userImages.length>1) {
+                                                              await FirebaseFirestore.instance.collection('users').doc(API.currentUserAuth()!.uid).update(
+                                                                {"userImages":FieldValue.arrayRemove([user.userImages[user.userImages.length -1-currentIndex]])}).whenComplete((){
+                                                              });
+
+                                                              }
+                                                            },
+                                                          child: const Row(
+                                                            children: [
+                                                              Padding(padding: EdgeInsets.only(right: 15),
+                                                                child: Icon(
+                                                                  MaterialCommunityIcons
+                                                                      .delete_outline,
+                                                                  color: Colors
+                                                                      .white,
+                                                                ),
+                                                              ),
+                                                              Text(
+                                                                'Delete Photo',
                                                                 style: TextStyle(
                                                                     color: Colors
                                                                         .white),
@@ -395,6 +492,7 @@ class _MySettingsState extends State<MySettings> {
                                                   height: height * 0.4,
                                                   width: width,
                                                   child: PageView.builder(
+                                                    controller: controller,
                                                     onPageChanged: (value) {
                                                       setState1(
                                                         () {
@@ -409,12 +507,7 @@ class _MySettingsState extends State<MySettings> {
                                                             Container(
                                                       decoration: BoxDecoration(
                                                           image: DecorationImage(
-                                                              image: NetworkImage(user
-                                                                  .userImages[user
-                                                                      .userImages
-                                                                      .length -
-                                                                  1 -
-                                                                  index]),
+                                                              image: NetworkImage(user.userImages[user.userImages.length -1 -index]),
                                                               fit: BoxFit
                                                                   .cover)),
                                                     ),
@@ -491,12 +584,14 @@ class _MySettingsState extends State<MySettings> {
                               ),
                               InkWell(
                                 onLongPress: () async {
-                                  if(user.userBio!='') {
+                                  if (user.userBio != '') {
                                     await Clipboard.setData(
                                         ClipboardData(text: user.userBio));
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar( behavior: SnackBarBehavior.floating,
-                                            duration: const Duration(seconds: 1),
+                                        SnackBar(
+                                            behavior: SnackBarBehavior.floating,
+                                            duration:
+                                                const Duration(seconds: 1),
                                             backgroundColor: darkMode
                                                 ? const Color(0xff47555E)
                                                 : const Color(0xff7AA5D2),
@@ -520,9 +615,9 @@ class _MySettingsState extends State<MySettings> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => EditPage(
-                                              info: user.userBio,
-                                            isBio: true,
-                                          )));
+                                                info: user.userBio,
+                                                isBio: true,
+                                              )));
                                 },
                                 child: Container(
                                   padding: EdgeInsets.only(
@@ -536,7 +631,9 @@ class _MySettingsState extends State<MySettings> {
                                         height: 5,
                                       ),
                                       Text(
-                                        user.userBio==''?"None":user.userBio,
+                                        user.userBio == ''
+                                            ? "None"
+                                            : user.userBio,
                                         style: const TextStyle(fontSize: 18),
                                       ),
                                       const SizedBox(
@@ -555,31 +652,34 @@ class _MySettingsState extends State<MySettings> {
                                 onLongPress: () async {
                                   await Clipboard.setData(ClipboardData(
                                       text:
-                                      "${user.country.characters.skip(5)}, ${user.state}, ${user.city}"));
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                      behavior: SnackBarBehavior.floating,
-                                      duration: const Duration(seconds: 1),
-                                      backgroundColor: darkMode
-                                          ? const Color(0xff47555E)
-                                          : const Color(0xff7AA5D2),
-                                      content: const Row(
-                                        children: [
-                                          Icon(
-                                            Icons.copy,
-                                            color: Colors.white,
-                                          ),
-                                          Text(
-                                            '  Location copied to clipboard',
-                                            style: TextStyle(color: Colors.white),
-                                          )
-                                        ],
-                                      )));
+                                          "${user.country.characters.skip(5)}, ${user.state}, ${user.city}"));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          behavior: SnackBarBehavior.floating,
+                                          duration: const Duration(seconds: 1),
+                                          backgroundColor: darkMode
+                                              ? const Color(0xff47555E)
+                                              : const Color(0xff7AA5D2),
+                                          content: const Row(
+                                            children: [
+                                              Icon(
+                                                Icons.copy,
+                                                color: Colors.white,
+                                              ),
+                                              Text(
+                                                '  Location copied to clipboard',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              )
+                                            ],
+                                          )));
                                 },
                                 child: Padding(
                                   padding: EdgeInsets.only(
                                       left: width * 0.05, top: 5, bottom: 5),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       const Row(),
                                       Text(
@@ -603,10 +703,12 @@ class _MySettingsState extends State<MySettings> {
                               ),
                               InkWell(
                                 onLongPress: () async {
-                                  await Clipboard.setData(
-                                      ClipboardData(text: API.currentUserAuth()!.email ?? ''));
+                                  await Clipboard.setData(ClipboardData(
+                                      text:
+                                          API.currentUserAuth()!.email ?? ''));
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar( behavior: SnackBarBehavior.floating,
+                                      SnackBar(
+                                          behavior: SnackBarBehavior.floating,
                                           duration: const Duration(seconds: 1),
                                           backgroundColor: darkMode
                                               ? const Color(0xff47555E)
@@ -629,11 +731,13 @@ class _MySettingsState extends State<MySettings> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              EditPage(
-                                              info: API.currentUserAuth()!.email ?? '',
-                                                isBio: false,)
-                                      ));
+                                          builder: (context) => EditPage(
+                                                info: API
+                                                        .currentUserAuth()!
+                                                        .email ??
+                                                    '',
+                                                isBio: false,
+                                              )));
                                 },
                                 child: Container(
                                   padding: EdgeInsets.only(
@@ -667,31 +771,34 @@ class _MySettingsState extends State<MySettings> {
                                 onLongPress: () async {
                                   await Clipboard.setData(ClipboardData(
                                       text:
-                                      "${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).day} ${MyDataUtil.getMonth(DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)))} ${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).year}"));
-                                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                      behavior: SnackBarBehavior.floating,
-                                      duration: const Duration(seconds: 1),
-                                      backgroundColor: darkMode
-                                          ? const Color(0xff47555E)
-                                          : const Color(0xff7AA5D2),
-                                      content: const Row(
-                                        children: [
-                                          Icon(
-                                            Icons.copy,
-                                            color: Colors.white,
-                                          ),
-                                          Text(
-                                            '  Joined Time copied to clipboard',
-                                            style: TextStyle(color: Colors.white),
-                                          )
-                                        ],
-                                      )));
+                                          "${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).day} ${MyDataUtil.getMonth(DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)))} ${DateTime.fromMillisecondsSinceEpoch(int.parse(user.createdAt)).year}"));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          behavior: SnackBarBehavior.floating,
+                                          duration: const Duration(seconds: 1),
+                                          backgroundColor: darkMode
+                                              ? const Color(0xff47555E)
+                                              : const Color(0xff7AA5D2),
+                                          content: const Row(
+                                            children: [
+                                              Icon(
+                                                Icons.copy,
+                                                color: Colors.white,
+                                              ),
+                                              Text(
+                                                '  Joined Time copied to clipboard',
+                                                style: TextStyle(
+                                                    color: Colors.white),
+                                              )
+                                            ],
+                                          )));
                                 },
                                 child: Padding(
                                   padding: EdgeInsets.only(
                                       left: width * 0.05, top: 5, bottom: 5),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       const Row(),
                                       Text(
@@ -728,84 +835,70 @@ class _MySettingsState extends State<MySettings> {
 
   Future<dynamic> chooseSource(BuildContext context, bool darkMode) {
     return showDialog(
-                                barrierColor: null,
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10)
-                                    ),
-                                    backgroundColor: darkMode
-                                        ? const Color(0xff395781)
-                                        : Colors.grey.shade50,
-                                    shadowColor: Colors.black,
-                                    content: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'Select source',
-                                          style: TextStyle(
-                                              color: darkMode
-                                                  ? Colors.white
-                                                  : Colors.black,
-                                              fontWeight: FontWeight.w400,fontSize: 18),
-                                        ),
-                                      ],
-                                    ),
-                                    actionsAlignment: MainAxisAlignment.center,
-                                    actions: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                          children: [
-                                            GestureDetector(
-                                              onTap: () async {
-                                                Navigator.pop(context);
-                                                image = await ImagePicker()
-                                                    .pickImage(
-                                                    source: ImageSource.camera,
-                                                    preferredCameraDevice:
-                                                    CameraDevice.front,
-                                                    imageQuality: 50);
-                                                setState(() {});
-                                              },
-                                              child: const Text(
-                                                'Camera',
-                                                style: TextStyle(
-                                                    color: Colors.blue,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 20),
-                                              ),
-                                            ),
-                                            GestureDetector(
-                                              onTap: () async {
-                                                Navigator.pop(context);
-                                                image = await ImagePicker()
-                                                    .pickImage(
-                                                    source: ImageSource.gallery,
-                                                    imageQuality: 50);
-                                                setState(() {});
-                                              },
-                                              child: const Text(
-                                                'Gallery',
-                                                style: TextStyle(
-                                                    color: Colors.blue,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 20),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ]),
-                              );
+      barrierColor: null,
+      context: context,
+      builder: (context) => AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor:
+              darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
+          shadowColor: Colors.black,
+          content: const Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Select source',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 18),
+              ),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+                      Navigator.pop(context);
+                      onclick(ImageSource.camera,darkMode);
+                    },
+                    child: const Text(
+                      'Camera',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 20),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      Navigator.pop(context);
+                      onclick(ImageSource.gallery,darkMode);
+                    },
+                    child: const Text(
+                      'Gallery',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 20),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ]),
+    );
   }
 
-  Future<void> getDeviceInfo()async{
-    if(TargetPlatform.iOS==defaultTargetPlatform){
+  Future<void> getDeviceInfo() async {
+    if (TargetPlatform.iOS == defaultTargetPlatform) {
       DeviceInfo = await deviceInfo.iosInfo;
-    }else{
+    } else {
       DeviceInfo = await deviceInfo.androidInfo;
     }
   }

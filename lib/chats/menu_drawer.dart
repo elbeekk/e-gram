@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:elbekgram/chats/chatpage.dart';
 import 'package:elbekgram/draweritems/settings_page/mysettings.dart';
 import 'package:elbekgram/helpers/api.dart';
 import 'package:elbekgram/helpers/widgets.dart';
@@ -98,7 +99,7 @@ class _MyDrawerState extends State<MyDrawer> {
                 MyDrawerItem(darkMode: darkMode, title:'Contacts', icon: Icons.person_2_outlined,route: const MyContacts(),),
                 MyDrawerItem(darkMode: darkMode, title:'Calls', icon: Ionicons.call_outline,route: const MyCalls(),),
                 MyDrawerItem(darkMode: darkMode, title:'People Nearby', icon: Icons.location_on_outlined),
-                MyDrawerItem(darkMode: darkMode, title:'Saved Messages', icon: Icons.bookmark_border),
+                MyDrawerItem(darkMode: darkMode, title:'Saved Messages', icon: Icons.bookmark_border,route: ChatPage(uid: API.currentUserAuth()!.uid,),),
                 MyDrawerItem(darkMode: darkMode, title:'Settings', icon: Ionicons.settings_outline,route: const MySettings(),),
                 Divider(
                   height: 5,

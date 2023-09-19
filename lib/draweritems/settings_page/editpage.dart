@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elbekgram/helpers/widgets.dart';
-import 'package:elbekgram/models/usermodel.dart';
 import 'package:elbekgram/var_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

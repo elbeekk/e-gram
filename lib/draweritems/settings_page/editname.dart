@@ -1,11 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:elbekgram/helpers/api.dart';
 import 'package:elbekgram/helpers/widgets.dart';
 import 'package:elbekgram/var_provider.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EditName extends StatefulWidget {
-  const EditName({super.key});
+  final String fName;
+  final String lName;
+  const EditName({super.key,required this.fName,required this.lName});
 
   @override
   State<EditName> createState() => _EditNameState();
@@ -14,8 +17,11 @@ class EditName extends StatefulWidget {
 class _EditNameState extends State<EditName> {
   TextEditingController firstName = TextEditingController();
   TextEditingController lastName = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    firstName.text = widget.fName;
+    lastName.text = widget.lName;
     var currentPlatform = Theme.of(context).platform;
     bool darkMode = Provider.of<VarProvider>(context).darkMode;
     double height = MediaQuery.sizeOf(context).height;
@@ -59,6 +65,10 @@ class _EditNameState extends State<EditName> {
                 onPressed: () {
                   if (firstName.text.isEmpty) {
                    Widgets.snackBar(context, darkMode, Icons.error_outline, 'Fist name must not be empty', true);
+                  }else{
+                    FirebaseFirestore.instance.collection('users').doc(API.currentUserAuth()!.uid).update({'userFirstName':firstName.text.trim(),'userLastName':lastName.text.trim()});
+                    Widgets.snackBar(context, darkMode, Icons.check, 'Successfully updated', false);
+                    Navigator.pop(context);
                   }
                 },
                 backgroundColor:
@@ -90,7 +100,7 @@ class _EditNameState extends State<EditName> {
                         height: 10,
                       ),
                       const Text(
-                        'Enter your name and add a profile photo',
+                        'Enter your first and last name.',
                         style: TextStyle(
                           color: Colors.grey,
                         ),
@@ -140,96 +150,6 @@ class _EditNameState extends State<EditName> {
                       ),
                     ],
                   ),
-                  const Text(''),
-                  SizedBox(
-                    height: MediaQuery.sizeOf(context).height*0.29,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'By signing up, you agree',
-                              style: TextStyle(
-                                  color: Colors.grey.withOpacity(0.8),
-                                  fontSize: 13),
-                            ),
-                            RichText(
-                                text: TextSpan(
-                                    text: 'to the ',
-                                    style: TextStyle(
-                                        color: Colors.grey.withOpacity(0.8),
-                                        fontSize: 13),
-                                    children: [
-                                      TextSpan(
-                                          text: 'Tems of Service',
-                                          recognizer: TapGestureRecognizer()
-                                            ..onTap = () => showDialog(
-                                              context: context,
-                                              barrierColor: null,
-                                              builder: (context) {
-                                                return AlertDialog(
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(10)
-                                                  ),
-                                                  backgroundColor: darkMode
-                                                      ? const Color(0xff395781)
-                                                      : Colors.grey.shade50,
-                                                  shadowColor: Colors.black,
-                                                  content: Text(
-                                                    'Close this window and continue registration))',
-                                                    style: TextStyle(
-                                                        color: darkMode
-                                                            ? Colors.white
-                                                            : Colors.black,
-                                                        fontSize: 15),
-                                                  ),
-                                                  title: Text(
-                                                    'Terms of Service',
-                                                    style: TextStyle(
-                                                        color: darkMode
-                                                            ? Colors.white
-                                                            : Colors.black,
-                                                        fontWeight:
-                                                        FontWeight.w500,
-                                                        fontSize: 20),
-                                                  ),
-                                                  actions: [
-                                                    GestureDetector(
-                                                      onTap: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child: const Padding(
-                                                        padding:
-                                                        EdgeInsets.all(10),
-                                                        child: Text(
-                                                          'OK',
-                                                          style: TextStyle(
-                                                              color:
-                                                              Colors.blue,
-                                                              fontWeight:
-                                                              FontWeight
-                                                                  .w600),
-                                                        ),
-                                                      ),
-                                                    )
-                                                  ],
-                                                );
-                                              },
-                                            ),
-                                          style: const TextStyle(
-                                              color: Colors.blue, fontSize: 13))
-                                    ]))
-                          ],
-                        ),
-                      ],
-                    ),
-                  )
                 ],
               ),
             ),

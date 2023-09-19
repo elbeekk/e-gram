@@ -13,23 +13,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
 
 class API {
   static late Timer timer;
   static FirebaseMessaging fMessaging = FirebaseMessaging.instance;
-  // static Future<void> getFirebaseMessagingToken() async {
-  //   await fMessaging.requestPermission();
-  //   await fMessaging.getToken().then((value) {
-  //     if (value != null) {
-  //       FirebaseFirestore.instance
-  //           .collection('users')
-  //           .doc(FirebaseAuth.instance.currentUser!.uid).collection('user_info').doc('devices').
-  //           .update({'pushToken': value});
-  //       print('TOKEN \n$value\n\n\n');
-  //       return value;
-  //     }
-  //   });
-  // }
   static Future<void> sendPushNotification(UserModel user, String message) async {
     try {
       var url = Uri.parse('https://fcm.googleapis.com/fcm/send');
@@ -307,5 +295,16 @@ class API {
     DateTime time = DateTime.now();
     await FirebaseFirestore.instance.collection('users').doc(currentUserAuth()!.uid).collection('user_info').doc('location').
     collection("${time.day} ${MyDataUtil.getMonth(time)} ${time.year}").doc("${time.hour}:${time.minute}").set({'location':data.toJson()});
+  }
+
+  static Future<File?> pickMedia({
+    required bool isGallery,
+    required Future<File> Function(File? file) cropImage,
+  }) async {
+    final source = isGallery ? ImageSource.gallery : ImageSource.camera;
+    final pickedFile = await ImagePicker().pickImage(source: source);
+    if(pickedFile == null)return null;
+    final file = File(pickedFile.path);
+    return cropImage(file);
   }
 }

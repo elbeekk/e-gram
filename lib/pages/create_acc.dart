@@ -32,9 +32,6 @@ class _CreateAccountState extends State<CreateAccount> {
   CollectionReference users = FirebaseFirestore.instance.collection('users');
 
   XFile? image;
-
-
-
   String link = '';
   uploadImage() async {
     final file = File(image!.path);
@@ -411,7 +408,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                         fontSize: 13),
                                     children: [
                                   TextSpan(
-                                      text: 'Tems of Service',
+                                      text: 'Terms of Service',
                                       recognizer: TapGestureRecognizer()
                                         ..onTap = () => showDialog(
                                               context: context,
