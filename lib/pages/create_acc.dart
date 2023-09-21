@@ -1,6 +1,6 @@
 import 'dart:io';
+import 'package:elbekgram/helpers/api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
@@ -30,33 +30,21 @@ class _CreateAccountState extends State<CreateAccount> {
   final TextEditingController firstName = TextEditingController();
   final TextEditingController lastName = TextEditingController();
   CollectionReference users = FirebaseFirestore.instance.collection('users');
-
   XFile? image;
   String link = '';
-  uploadImage() async {
-    final file = File(image!.path);
-    final ref = FirebaseStorage.instance.ref().child('users/${FirebaseAuth.instance.currentUser!.uid}/${image!.name}');
-    var uploadTask = ref.putFile(file);
-    await uploadTask.whenComplete(() {
-      try {
-       setState(() async {
-         link = await ref.getDownloadURL();
-       });
-      } catch (onError) {
-        print("Error (could not get URL)");
-        setState(() {
-          link = 'https://t4.ftcdn.net/jpg/00/65/77/27/240_F_65772719_A1UV5kLi5nCEWI0BNLLiFaBPEkUbv5Fv.jpg';
-        });
-      }
-    });
-  }
-
+  bool isDone=false;
+  bool isStart=false;
 
 
   createAc() async {
     var uid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance.collection('users').doc(uid.toString()).collection('user_info').doc('devices').set(
+        {
+          'devices':[],
+          'token':[],
+        });
     var users = FirebaseFirestore.instance.collection('users').doc(uid.toString());
-    users.set({
+    users.update({
       'chattingWith':[uid.toString()],
       'country': widget.country,
       'state': widget.state,
@@ -70,11 +58,6 @@ class _CreateAccountState extends State<CreateAccount> {
       'lastActive':DateTime.now().millisecondsSinceEpoch.toString(),
       'userLastName': lastName.text,
       'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
-      'userImages': [
-       if(link.toString()=='')'https://t4.ftcdn.net/jpg/00/65/77/27/240_F_65772719_A1UV5kLi5nCEWI0BNLLiFaBPEkUbv5Fv.jpg',
-       if(link.toString()!='')link.toString(),
-
-      ],
     });
   }
 
@@ -134,7 +117,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       ),
                     );
                   } else {
-                    if (image != null) {
+                    if (isDone) {
                       showDialog(
                         context: context,
                         barrierColor: null,
@@ -258,17 +241,16 @@ class _CreateAccountState extends State<CreateAccount> {
                                           MainAxisAlignment.spaceAround,
                                       children: [
                                         GestureDetector(
-                                          onTap: () async {
+                                          onTap: ()  {
+                                            setState(() {
+                                              isStart=true;
+                                            });
                                             Navigator.pop(context);
-                                            image = await ImagePicker()
-                                                .pickImage(
-                                                    source: ImageSource.camera,
-                                                    preferredCameraDevice:
-                                                        CameraDevice.front,
-                                                    imageQuality: 50);
-                                            uploadImage();
-                                            setState(() {});
-                                          },
+                                            API.uploadImageInit(ImageSource.camera, darkMode, context, ).whenComplete((){setState(() {
+                                              isStart=false;
+                                              isDone=true;
+                                            });});
+                                            },
                                           child: const Text(
                                             'Camera',
                                             style: TextStyle(
@@ -279,14 +261,15 @@ class _CreateAccountState extends State<CreateAccount> {
                                         ),
                                         GestureDetector(
                                           onTap: () async {
+                                            setState(() {
+                                              isStart=true;
+                                            });
                                             Navigator.pop(context);
-                                            image = await ImagePicker()
-                                                .pickImage(
-                                                    source: ImageSource.gallery,
-                                                    imageQuality: 50);
-                                            uploadImage();
-                                            setState(() {});
-                                          },
+                                            API.uploadImageInit(ImageSource.gallery, darkMode, context,).whenComplete(() {setState(() {
+                                              isDone=true;
+                                              isStart=false;
+                                            });});
+                                            },
                                           child: const Text(
                                             'Gallery',
                                             style: TextStyle(
@@ -305,16 +288,21 @@ class _CreateAccountState extends State<CreateAccount> {
                             radius: 40,
                             backgroundColor:
                             darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
-                            backgroundImage: image != null
-                                ? FileImage(File(image!.path))
-                                : null,
-                            child: image == null
+                            child:!isStart ?  !isDone
                                 ? const Icon(
-                                    MaterialCommunityIcons.camera_plus,
-                                    size: 30,
-                                    color: Colors.white,
-                                  )
-                                : null),
+                              MaterialCommunityIcons.camera_plus,
+                              size: 30,
+                              color: Colors.white,
+                            ): const Icon(
+                              MaterialCommunityIcons.check,
+                              size: 60,
+                              color: Colors.white,
+                            ) :const CircularProgressIndicator(color: Colors.white,)
+
+
+
+
+                                ),
                       ),
                       const SizedBox(
                         height: 10,

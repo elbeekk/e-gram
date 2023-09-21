@@ -3,10 +3,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:elbekgram/draweritems/settings_page/editname.dart';
 import 'package:elbekgram/helpers//api.dart';
-import 'package:elbekgram/helpers/image_picker.dart';
 import 'package:elbekgram/helpers/my_data_util.dart';
-import 'package:elbekgram/helpers/widgets.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:http/http.dart' as http;
@@ -18,7 +15,6 @@ import 'package:elbekgram/var_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -42,26 +38,6 @@ class _MySettingsState extends State<MySettings> {
   TextEditingController emailCon = TextEditingController();
   late var DeviceInfo;
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  Future<void> onclick(ImageSource source,bool darkMode)async{
-    image = await ImagePickerService.pickCropImage(cropAspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1), imageSource: source,darkMode: darkMode);
-    final file = File(image!.path);
-    final ref = FirebaseStorage.instance.ref().child('users/${API.currentUserAuth()?.uid ?? ''}/${image!.name}');
-    var uploadTask = ref.putFile(file).whenComplete(() async { link = await ref.getDownloadURL();});
-    await uploadTask.whenComplete(() async {
-      try {
-            if(link.isNotEmpty){return await FirebaseFirestore.instance.collection('users').doc(API.currentUserAuth()!.uid).update(
-                {'userImages':FieldValue.arrayUnion([link])}).whenComplete((){ image=null;
-            link='';});}
-      } catch (onError) {
-        Widgets.snackBar(context, darkMode, Icons.error_outline, "", true);
-        print("Error (could not get URL)");
-        setState(() {
-          link = 'https://t4.ftcdn.net/jpg/00/65/77/27/240_F_65772719_A1UV5kLi5nCEWI0BNLLiFaBPEkUbv5Fv.jpg';
-        });
-      }
-    });
-    setState(() {});
-  }
   @override
   Widget build(BuildContext context) {
     var currentPlatform = Theme.of(context).platform;
@@ -280,6 +256,10 @@ class _MySettingsState extends State<MySettings> {
                                                           ),
                                                   ),
                                                   PopupMenuButton(
+                                                    icon: const Icon(
+                                                      Ionicons.ellipsis_vertical,
+                                                      color: Colors.white,
+                                                    ),
                                                     shape: const RoundedRectangleBorder(
                                                         borderRadius:
                                                             BorderRadius.all(
@@ -361,7 +341,7 @@ class _MySettingsState extends State<MySettings> {
                                                                   .saveImage(
                                                                 path,
                                                                 albumName:
-                                                                    'Elbekgram',
+                                                                    'e.gram',
                                                               ).whenComplete(
                                                                   () => print(
                                                                       '||||||||||||||| SAVED ||||||||||||||'));
@@ -394,13 +374,8 @@ class _MySettingsState extends State<MySettings> {
                                                           ),
                                                         ),
                                                             if(user.userImages.length>1)PopupMenuItem(
-                                                          onTap:() async {
-                                                            if(user.userImages.length>1) {
-                                                              await FirebaseFirestore.instance.collection('users').doc(API.currentUserAuth()!.uid).update(
-                                                                {"userImages":FieldValue.arrayRemove([user.userImages[user.userImages.length -1-currentIndex]])}).whenComplete((){
-                                                              });
-
-                                                              }
+                                                          onTap:(){
+                                                           API.deleteProfilePhoto(user.userImages, currentIndex);
                                                             },
                                                           child: const Row(
                                                             children: [
@@ -429,23 +404,6 @@ class _MySettingsState extends State<MySettings> {
                                                           ));
                                                       return list;
                                                     },
-                                                    child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              right: 20),
-                                                      child: Transform.rotate(
-                                                        angle: 3.14 / 1,
-                                                        child: SizedBox(
-                                                          width: height * .047,
-                                                          height: height * .047,
-                                                          child: const Center(
-                                                              child: Icon(
-                                                            Icons.menu,
-                                                            color: Colors.white,
-                                                          )),
-                                                        ),
-                                                      ),
-                                                    ),
                                                   )
                                                 ],
                                               ),
@@ -865,8 +823,8 @@ class _MySettingsState extends State<MySettings> {
                   GestureDetector(
                     onTap: () async {
                       Navigator.pop(context);
-                      onclick(ImageSource.camera,darkMode);
-                    },
+                      API.uploadImage(ImageSource.camera, darkMode, context, );
+                      },
                     child: const Text(
                       'Camera',
                       style: TextStyle(
@@ -878,7 +836,7 @@ class _MySettingsState extends State<MySettings> {
                   GestureDetector(
                     onTap: () async {
                       Navigator.pop(context);
-                      onclick(ImageSource.gallery,darkMode);
+                      API.uploadImage(ImageSource.gallery, darkMode,  context, );
                     },
                     child: const Text(
                       'Gallery',

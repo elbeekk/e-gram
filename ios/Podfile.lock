@@ -628,12 +628,48 @@ PODS:
     - abseil/base/base_internal
     - abseil/base/config
     - abseil/meta/type_traits
+  - agora_rtc_engine (6.2.2):
+    - AgoraIrisRTC_iOS (= 4.2.2-build.1)
+    - AgoraRtcEngine_iOS (= 4.2.2)
+    - Flutter
+  - AgoraIrisRTC_iOS (4.2.2-build.1)
+  - AgoraRtcEngine_iOS (4.2.2):
+    - AgoraRtcEngine_iOS/AIAEC (= 4.2.2)
+    - AgoraRtcEngine_iOS/AINS (= 4.2.2)
+    - AgoraRtcEngine_iOS/AudioBeauty (= 4.2.2)
+    - AgoraRtcEngine_iOS/ClearVision (= 4.2.2)
+    - AgoraRtcEngine_iOS/ContentInspect (= 4.2.2)
+    - AgoraRtcEngine_iOS/DRM (= 4.2.2)
+    - AgoraRtcEngine_iOS/FaceDetection (= 4.2.2)
+    - AgoraRtcEngine_iOS/ReplayKit (= 4.2.2)
+    - AgoraRtcEngine_iOS/RtcBasic (= 4.2.2)
+    - AgoraRtcEngine_iOS/SpatialAudio (= 4.2.2)
+    - AgoraRtcEngine_iOS/VideoCodecDec (= 4.2.2)
+    - AgoraRtcEngine_iOS/VideoCodecEnc (= 4.2.2)
+    - AgoraRtcEngine_iOS/VirtualBackground (= 4.2.2)
+    - AgoraRtcEngine_iOS/VQA (= 4.2.2)
+  - AgoraRtcEngine_iOS/AIAEC (4.2.2)
+  - AgoraRtcEngine_iOS/AINS (4.2.2)
+  - AgoraRtcEngine_iOS/AudioBeauty (4.2.2)
+  - AgoraRtcEngine_iOS/ClearVision (4.2.2)
+  - AgoraRtcEngine_iOS/ContentInspect (4.2.2)
+  - AgoraRtcEngine_iOS/DRM (4.2.2)
+  - AgoraRtcEngine_iOS/FaceDetection (4.2.2)
+  - AgoraRtcEngine_iOS/ReplayKit (4.2.2)
+  - AgoraRtcEngine_iOS/RtcBasic (4.2.2)
+  - AgoraRtcEngine_iOS/SpatialAudio (4.2.2)
+  - AgoraRtcEngine_iOS/VideoCodecDec (4.2.2)
+  - AgoraRtcEngine_iOS/VideoCodecEnc (4.2.2)
+  - AgoraRtcEngine_iOS/VirtualBackground (4.2.2)
+  - AgoraRtcEngine_iOS/VQA (4.2.2)
   - BoringSSL-GRPC (0.0.24):
     - BoringSSL-GRPC/Implementation (= 0.0.24)
     - BoringSSL-GRPC/Interface (= 0.0.24)
   - BoringSSL-GRPC/Implementation (0.0.24):
     - BoringSSL-GRPC/Interface (= 0.0.24)
   - BoringSSL-GRPC/Interface (0.0.24)
+  - camera_avfoundation (0.0.1):
+    - Flutter
   - cloud_firestore (4.9.1):
     - Firebase/Firestore (= 10.12.0)
     - firebase_core
@@ -731,6 +767,8 @@ PODS:
     - FirebaseCoreExtension (~> 10.0)
     - GTMSessionFetcher/Core (< 4.0, >= 2.1)
   - Flutter (1.0.0)
+  - flutter_notification_channel (0.0.1):
+    - Flutter
   - flutter_share (0.0.1):
     - Flutter
   - gallery_saver (0.0.1):
@@ -825,6 +863,8 @@ PODS:
     - TOCropViewController (~> 2.6.1)
   - image_picker_ios (0.0.1):
     - Flutter
+  - iris_method_channel (0.0.1):
+    - Flutter
   - leveldb-library (1.22.2)
   - nanopb (2.30909.0):
     - nanopb/decode (= 2.30909.0)
@@ -847,6 +887,8 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - agora_rtc_engine (from `.symlinks/plugins/agora_rtc_engine/ios`)
+  - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - emoji_picker_flutter (from `.symlinks/plugins/emoji_picker_flutter/ios`)
@@ -856,11 +898,13 @@ DEPENDENCIES:
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
+  - flutter_notification_channel (from `.symlinks/plugins/flutter_notification_channel/ios`)
   - flutter_share (from `.symlinks/plugins/flutter_share/ios`)
   - gallery_saver (from `.symlinks/plugins/gallery_saver/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
+  - iris_method_channel (from `.symlinks/plugins/iris_method_channel/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
@@ -870,6 +914,8 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - abseil
+    - AgoraIrisRTC_iOS
+    - AgoraRtcEngine_iOS
     - BoringSSL-GRPC
     - Firebase
     - FirebaseAppCheckInterop
@@ -894,6 +940,10 @@ SPEC REPOS:
     - TOCropViewController
 
 EXTERNAL SOURCES:
+  agora_rtc_engine:
+    :path: ".symlinks/plugins/agora_rtc_engine/ios"
+  camera_avfoundation:
+    :path: ".symlinks/plugins/camera_avfoundation/ios"
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
   device_info_plus:
@@ -912,6 +962,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_storage/ios"
   Flutter:
     :path: Flutter
+  flutter_notification_channel:
+    :path: ".symlinks/plugins/flutter_notification_channel/ios"
   flutter_share:
     :path: ".symlinks/plugins/flutter_share/ios"
   gallery_saver:
@@ -922,6 +974,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_cropper/ios"
   image_picker_ios:
     :path: ".symlinks/plugins/image_picker_ios/ios"
+  iris_method_channel:
+    :path: ".symlinks/plugins/iris_method_channel/ios"
   path_provider_foundation:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
@@ -935,7 +989,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   abseil: 926fb7a82dc6d2b8e1f2ed7f3a718bce691d1e46
+  agora_rtc_engine: 667a7de14f35858a31b0c64cd54042a2158ef198
+  AgoraIrisRTC_iOS: 7e71322c06db6c29ceaf89a964fb8b2700a75001
+  AgoraRtcEngine_iOS: c510de329cd905daff3f01fa4c872ea6d5eaee23
   BoringSSL-GRPC: 3175b25143e648463a56daeaaa499c6cb86dad33
+  camera_avfoundation: 3125e8cd1a4387f6f31c6c63abb8a55892a9eeeb
   cloud_firestore: 85d66b543b25130c45258412a39e851e230186e7
   device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   emoji_picker_flutter: df19dac03a2b39ac667dc8d1da939ef3a9e21347
@@ -957,6 +1015,7 @@ SPEC CHECKSUMS:
   FirebaseMessaging: bb2c4f6422a753038fe137d90ae7c1af57251316
   FirebaseStorage: 1d7ca8c8953fc61ccacaa7c612696b5402968a0d
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  flutter_notification_channel: 42a4f4938a3654cca62aa2a51aba0021dbfcac88
   flutter_share: 4be0208963c60b537e6255ed2ce1faae61cd9ac2
   gallery_saver: 9fc173c9f4fcc48af53b2a9ebea1b643255be542
   geolocator_apple: cc556e6844d508c95df1e87e3ea6fa4e58c50401
@@ -967,6 +1026,7 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: e8647203b65cee28c5f73d0f473d096653945e72
   image_cropper: a3291c624a953049bc6a02e1f8c8ceb162a24b25
   image_picker_ios: 4a8aadfbb6dc30ad5141a2ce3832af9214a705b5
+  iris_method_channel: 0617c689164d8154c020c50f63ca79f92b8a7b9d
   leveldb-library: f03246171cce0484482ec291f88b6d563699ee06
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431
   path_provider_foundation: 29f094ae23ebbca9d3d0cec13889cd9060c0e943

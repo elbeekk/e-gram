@@ -109,7 +109,7 @@ class _MyDrawerState extends State<MyDrawer> {
                   color:darkMode ? const Color(0xff000409):Colors.grey.shade300,
                 ),
                 MyDrawerItem(darkMode: darkMode, title:'Invite Friends', icon: Ionicons.person_add_outline),
-                MyDrawerItem(darkMode: darkMode, title:'Telegram Features', icon: MaterialCommunityIcons.progress_question),
+                MyDrawerItem(darkMode: darkMode, title:'e.gram Features', icon: MaterialCommunityIcons.progress_question),
 
               ],
             ),

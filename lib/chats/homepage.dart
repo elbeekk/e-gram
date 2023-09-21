@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:elbekgram/helpers//api.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:elbekgram/chats/chatpage.dart';
 import 'package:elbekgram/chats/profileview.dart';
@@ -54,6 +55,7 @@ class _HomePageState extends State<HomePage> {
       return Future.value(message);
     });
     initDynamicLinks();
+    listenMessage();
     super.initState();
   }
 
@@ -93,7 +95,15 @@ class _HomePageState extends State<HomePage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-          },
+            getDeviceInfo().whenComplete(() {
+              if (TargetPlatform.iOS ==
+                  defaultTargetPlatform) {
+                API.iosSignOut(context, DeviceInfo);
+              } else {
+                API.androidSignOut(context, DeviceInfo);
+              }
+            });
+            },
           elevation: 0,
           backgroundColor:
           darkMode ? const Color(0xff47555E) : const Color(0xff7AA5D2),
@@ -197,6 +207,18 @@ class _HomePageState extends State<HomePage> {
           },
         ));
   }
+
+  listenMessage(){
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('Got a message whilst in the foreground');
+      debugPrint('Message data: ${message.data}');
+      debugPrint('Message from: ${message.from}');
+      if(message.notification!=null){
+        debugPrint('Message notification: ${message.notification}');
+      }
+    });
+  }
+  
   Future<void> initDynamicLinks() async {
     dynamicLinks.onLink.listen((dynamicLinkData) {
       debugPrint('DATAAAAAAAAAA$dynamicLinkData');

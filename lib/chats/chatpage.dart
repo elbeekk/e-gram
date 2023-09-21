@@ -1,5 +1,6 @@
 import 'package:animations/animations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:elbekgram/chats/index.dart';
 import 'package:elbekgram/helpers//api.dart';
 import 'package:elbekgram/helpers//my_data_util.dart';
 import 'package:elbekgram/chats/profileview.dart';
@@ -211,8 +212,11 @@ class _ChatPageState extends State<ChatPage> {
                                                 ],
                                               ),
                                             ),
-                                            const PopupMenuItem(
-                                              child: Row(
+                                             PopupMenuItem(
+                                              onTap:() {
+                                                Navigator.push(context, MaterialPageRoute(builder: (context) => IndexPage(),));
+                                              },
+                                              child: const Row(
                                                 children: [
                                                   Padding(
                                                     padding: EdgeInsets.only(
@@ -545,23 +549,28 @@ class _ChatPageState extends State<ChatPage> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              InkWell(
-                                onTap: () {
-                                  if (showEmoji) {
-                                    FocusScope.of(context).requestFocus();
-                                    setState(() {
-                                      showEmoji = false;
-                                    });
-                                  } else {
-                                    FocusScope.of(context).unfocus();
-                                    setState(() {
-                                      showEmoji = true;
-                                    });
-                                  }
-                                },
-                                child: Padding(
-                                  padding:
-                                  const EdgeInsets.only(left: 17, bottom: 20),
+                              Padding(
+                                padding:
+                                const EdgeInsets.only(left: 17, bottom: 20),
+                                child: InkWell(
+                                  hoverColor: Colors.red,
+                                  highlightColor: Colors.red,
+                                  focusColor: Colors.red,
+                                  radius: 30,
+                                  splashColor: Colors.red,
+                                  onTap: () {
+                                    if (showEmoji) {
+                                      FocusScope.of(context).requestFocus();
+                                      setState(() {
+                                        showEmoji = false;
+                                      });
+                                    } else {
+                                      FocusScope.of(context).unfocus();
+                                      setState(() {
+                                        showEmoji = true;
+                                      });
+                                    }
+                                  },
                                   child: Icon(
                                     !showEmoji
                                         ? Icons.emoji_emotions_outlined

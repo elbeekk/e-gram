@@ -5,6 +5,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_notification_channel/flutter_notification_channel.dart';
+import 'package:flutter_notification_channel/notification_importance.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:elbekgram/chats/homepage.dart';
 import 'package:elbekgram/firebase_options.dart';
@@ -15,6 +18,14 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  var result = await FlutterNotificationChannel.registerNotificationChannel(
+    description: 'Fow showing message notification',
+    id: 'chats',
+    importance: NotificationImportance.IMPORTANCE_HIGH,
+    name: 'Chats',
+  );
+  print(result);
+  debugPrint(result);
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown

@@ -1,4 +1,7 @@
 import 'dart:io';
+import 'package:elbekgram/chats/camerapicker.dart';
+import 'package:elbekgram/chats/index.dart';
+import 'package:elbekgram/chats/videocall.dart';
 import 'package:elbekgram/helpers//my_data_util.dart';
 import 'package:elbekgram/helpers/api.dart';
 import 'package:elbekgram/models/usermodel.dart';
@@ -11,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_vector_icons/flutter_vector_icons.dart';
 import 'package:gallery_saver/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -27,7 +31,15 @@ class _MyProfileState extends State<MyProfile> {
   bool isMuted = true;
   bool isStreched = false;
   int currentIndex = 0;
+  Future<void> onJoin(bool isVideo) async {
+    if(isVideo) await _handleCameraAndMic(Permission.camera);
+    await _handleCameraAndMic(Permission.microphone);
+  }
 
+  Future<void> _handleCameraAndMic(Permission permission) async {
+    final status = await permission.request();
+    print(status);
+  }
   @override
   Widget build(BuildContext context) {
     var currentPlatform = Theme.of(context).platform;
@@ -51,7 +63,14 @@ class _MyProfileState extends State<MyProfile> {
                   actions: [
                     InkWell(
                       borderRadius: BorderRadius.circular(15),
-                      onTap: () {},
+                      onTap: () {
+                      onJoin(true).whenComplete(() => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => VideoCall(uid: widget.uid,isVideo1: true),
+                        ),
+                      ));
+                        },
                       child: SizedBox(
                         width: width * 0.13,
                         child: const Icon(Ionicons.videocam),
@@ -59,7 +78,14 @@ class _MyProfileState extends State<MyProfile> {
                     ),
                     InkWell(
                       borderRadius: BorderRadius.circular(15),
-                      onTap: () {},
+                      onTap: () {
+                        onJoin(false).whenComplete(() => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => VideoCall(uid: widget.uid,isVideo1: false),
+                          ),
+                        ));
+                      },
                       child: SizedBox(
                         width: width * 0.13,
                         child: const Icon(Icons.call),
@@ -229,7 +255,7 @@ class _MyProfileState extends State<MyProfile> {
                                                                 .saveImage(
                                                               path,
                                                               albumName:
-                                                              'Elbekgram',
+                                                              'e.gram',
                                                             );
                                                           } catch (e) {
                                                             print('Error1');
