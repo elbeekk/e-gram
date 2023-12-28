@@ -1,16 +1,10 @@
-# elbekgram
+# e-gram
+Almost clone of the Telegram.
+Developed using Flutter Framework and Firebase Database
 
-A new Flutter project.
+## Preview
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![image](https://github.com/elbeekk/ChatApp/assets/121304208/5e6d9e89-f79e-4f44-a181-7342b10159b3)
+![image](https://github.com/elbeekk/ChatApp/assets/121304208/ff08715c-826d-4900-aaee-c668bf633e3d)
+![image](https://github.com/elbeekk/ChatApp/assets/121304208/3db33c32-34d1-4090-9496-3a48c34ee093)
+![image](https://github.com/elbeekk/ChatApp/assets/121304208/30634e36-238c-44b1-97d6-1e5b52d24766)
